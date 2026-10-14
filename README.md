@@ -1,11 +1,10 @@
-# Regalvest 2.0 investor MVP
+# Regalvest 2.0 investor application
 
-A pre-launch proof of concept: a responsive Next.js landing page, a NestJS REST API, and a PostgreSQL waitlist. The financial products and `/demo` dashboard are **concepts**, not available services. The waitlist is the only user-facing persisted feature.
+Next.js public site and protected dashboard, NestJS REST API, and PostgreSQL persistence. Account identity is real. Every financial value and action is an isolated simulation. See [DEMO_GUIDE.md](DEMO_GUIDE.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Requirements
 
-- Node.js 20.9 or later, pnpm 10, and PostgreSQL 17 or later. Docker is optional for local PostgreSQL.
-- On Windows PowerShell, use `pnpm.cmd` if script execution policy blocks `pnpm.ps1`.
+Node.js 20.9+, pnpm 10 and PostgreSQL 17+. On Windows PowerShell use `pnpm.cmd` when script execution policy blocks `pnpm.ps1`. Docker Compose is optional; `compose.yaml` starts a local PostgreSQL instance on port 5433.
 
 ## Local setup
 
@@ -13,80 +12,62 @@ A pre-launch proof of concept: a responsive Next.js landing page, a NestJS REST 
 pnpm.cmd install
 Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env.local
-docker compose up -d postgres
-```
-
-If Docker is unavailable, use an existing local PostgreSQL server and update `DATABASE_URL` in `apps/api/.env`. Create a dedicated `regalvest` database and user first. The example Docker database listens on port `5433` to avoid conflict with another local server. Do not use the example password in production.
-
-Apply the checked-in migration, then start both apps:
-
-```powershell
-$env:DATABASE_URL = 'postgresql://regalvest:local_only_change_me@localhost:5433/regalvest'
+# If Docker is installed: docker compose up -d postgres
 pnpm.cmd db:migrate
 pnpm.cmd dev
 ```
 
-The API and Drizzle Kit load `apps/api/.env`; Next.js loads `apps/web/.env.local`. Visit `http://localhost:3000`, `http://localhost:3000/demo`, and `http://localhost:4000/api/docs`.
+Edit `apps/api/.env` before migrating. Set `DATABASE_URL` to a PostgreSQL connection string for the intended development database. The example Docker URL is for local use only. Set `CORS_ORIGINS` and `PUBLIC_WEB_URL` to the web origin. Set `API_PROXY_TARGET` in `apps/web/.env.local` to the API origin, normally `http://localhost:4000`. Keep `DEMO_MODE=true`.
 
-You may override these values for one PowerShell session:
+For real signup, email verification and recovery, add a Resend API key and an address on a verified sending domain to the ignored API environment file:
 
-```powershell
-$env:DATABASE_URL = 'postgresql://regalvest:local_only_change_me@localhost:5433/regalvest'
-$env:CORS_ORIGINS = 'http://localhost:3000'
-$env:PORT = '4000'
-pnpm.cmd dev
+```text
+RESEND_API_KEY=<private key>
+EMAIL_FROM=verified-sender@example.com
 ```
 
-## Checks
+Without those values, registration returns HTTP 503 before creating an account. Existing accounts can still sign in. Never commit credentials or paste them into chat. The API runs on `http://localhost:4000`, the site on `http://localhost:3000`, and Swagger on `http://localhost:4000/api/docs`.
+
+### Private account without an email provider
+
+For a single operator-controlled account, apply the migrations and run this in an **interactive terminal** from the repository root:
+
+```powershell
+pnpm.cmd --filter @regalvest/api account:provision
+```
+
+The command displays the database host and name for confirmation, then asks for your email, name, age and Terms confirmation, and a password twice. Password input is hidden, is never passed as a command argument or written to an environment file, and is stored only as an Argon2id hash. It refuses an existing email. Sign in at `/sign-in` with the account you created. This path records operator provisioning separately from email verification; it does not claim that the mailbox was verified. Public signup and email recovery still require Resend.
+
+If you lose the password, an operator with access to the same database can run `pnpm.cmd --filter @regalvest/api account:reset` in an interactive terminal. That command replaces the password hash and revokes all current sessions. Keep database credentials and terminal access private. For the live site, run these commands against the production database only after reviewing and applying the migrations there; the local `.env` determines which database is targeted.
+
+## Validation
 
 ```powershell
 pnpm.cmd typecheck
 pnpm.cmd lint
+pnpm.cmd test
 pnpm.cmd build
 ```
 
-For database integration tests, use a **separate database whose name contains `test`**. The test creates its own migration table, inserts a temporary email, and removes it. It refuses to run the integration suite unless `TEST_DATABASE_URL` names a test database.
+For PostgreSQL integration tests, set `TEST_DATABASE_URL` to a **separate database whose name contains `test`**. The suite refuses to run database tests against any other name. It migrates that database, inserts temporary accounts and removes them. A green run with the integration suite skipped is not database verification.
 
 ```powershell
-$env:TEST_DATABASE_URL = 'postgresql://regalvest:local_only_change_me@localhost:5433/regalvest_test'
-$env:DATABASE_URL = $env:TEST_DATABASE_URL
-$env:CORS_ORIGINS = 'http://localhost:3000'
+$env:TEST_DATABASE_URL = 'postgresql://user:password@localhost:5433/regalvest_test'
 pnpm.cmd test
 ```
 
-Without `TEST_DATABASE_URL`, Vitest skips the PostgreSQL integration suite; a green skipped run is not database verification.
-
-## API
-
-| Route                   | Purpose                                                                                       |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| `GET /api/v1/health`    | API and database readiness, service name, timestamp                                           |
-| `GET /api/v1/products`  | Five product categories, all marked `planned`                                                 |
-| `POST /api/v1/waitlist` | Validates email and consent, stores normalized email, returns the same success for duplicates |
-| `GET /api/docs`         | Swagger UI                                                                                    |
-
-Waitlist request example:
-
-```json
-{ "email": "investor@example.com", "consent": true }
-```
+Schema changes use `pnpm.cmd db:generate` followed by review of the SQL migration, then `pnpm.cmd db:migrate`. Do not use `drizzle-kit push` on a deployed database. The existing migration history is additive and preserves the waitlist.
 
 ## Deployment
 
-This workspace began without a Git repository. Initialize Git and push to a remote before using Git-connected Vercel or Render deployment.
+The older landing page and waitlist are live at [regalvest-web.onrender.com](https://regalvest-web.onrender.com); the older API is live at [regalvest-api.onrender.com](https://regalvest-api.onrender.com). **The expanded account and dashboard build is currently local and has not been deployed or live-verified.** Do not present the live URLs as the new full-stack version until deployment checks pass.
 
-```powershell
-git init
-git add .
-git commit -m "Build Regalvest investor MVP"
-git branch -M main
-git remote add origin <YOUR_REPOSITORY_URL>
-git push -u origin main
-```
+The intended low-cost setup is Neon PostgreSQL plus Render API and web services. Vercel may host the Next.js frontend on a plan whose terms permit this investor-facing use. Use the same-origin `/api/v1` rewrite for auth cookies.
 
-1. Create a managed PostgreSQL database on Render or another trusted provider. Keep its connection URL server-side. Set `DATABASE_URL`, `CORS_ORIGINS=https://YOUR_WEB_DOMAIN`, `NODE_ENV=production`, `PORT`, and `TRUST_PROXY_HOPS=1` for Render's trusted proxy on the API service. Use workspace root as the service root; build with `pnpm install --frozen-lockfile && pnpm --filter @regalvest/api build`, start with `pnpm --filter @regalvest/api start`.
-2. Run `pnpm --filter @regalvest/api db:migrate` against the production database as a controlled release step before directing traffic to the API. Never use `drizzle-kit push` against production.
-3. Deploy `apps/web` to Vercel from this monorepo, with `apps/web` as the root directory. Set `NEXT_PUBLIC_API_URL` to the public HTTPS API origin, without a trailing slash. Next.js embeds this variable at build time, so rebuild after changing it.
-4. Confirm API health, products, Swagger, CORS from the web origin, waitlist submission and duplicate behavior, and the Vercel page on a narrow mobile viewport. No production deployment is claimed by this repository.
+1. For private operator access, provision an account with the command above. Add `PUBLIC_WEB_URL=https://<web-origin>` and `DEMO_MODE=true` to the Render API environment. Keep `DATABASE_URL` private. Set `CORS_ORIGINS` to the exact HTTPS web origin and `TRUST_PROXY_HOPS=1`. Resend keys and a verified sender are needed only to enable public signup and email recovery.
+2. Review and apply checked-in Drizzle migrations to the intended production Neon database using `pnpm.cmd db:migrate` with its private `DATABASE_URL`. The new migration adds identity and demo tables; it does not alter the waitlist.
+3. Render API service: leave Root Directory blank. Build: `corepack pnpm install --frozen-lockfile && corepack pnpm --filter @regalvest/api build`. Start: `corepack pnpm --filter @regalvest/api start`.
+4. Render web service: leave Root Directory blank. Build: `corepack pnpm install --frozen-lockfile && corepack pnpm --filter @regalvest/web build`. Start: `corepack pnpm --filter @regalvest/web start`. Set `API_PROXY_TARGET=https://<api-origin>` and `NEXT_PUBLIC_API_URL` to the same origin for server rendering compatibility. Rebuild when the API origin changes.
+5. Verify live health, Swagger, public pages, operator-provisioned login cookie, hard-refresh dashboard, demo persistence, logout and mobile layouts before sharing the new version. If Resend is configured later, also verify signup email delivery, one-use verification and password recovery.
 
-The public waitlist limiter is process-local and suited to a single API instance for this MVP. Use a shared limiter if the API is later scaled across instances.
+Render Free services may sleep while idle. The API rate limiter is process-local and should be replaced before horizontal scaling. The source and deployment status are recorded in [docs/investor-evidence.md](docs/investor-evidence.md).

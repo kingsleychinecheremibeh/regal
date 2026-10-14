@@ -1,38 +1,56 @@
-import Link from "next/link";
-import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-
+import { SiteFooter } from "@/components/site-footer";
 export const metadata = { title: "Privacy notice — Regalvest 2.0" };
-
 export default function PrivacyPage() {
   return (
     <>
       <SiteHeader />
-      <main className="container interior-page">
-        <span className="section-kicker">PRIVACY NOTICE</span>
-        <h1>Your interest, handled with care.</h1>
-        <p>
-          Regalvest 2.0 currently collects only the email address you submit and
-          the time you consent to pre-launch updates. We use this information to
-          manage the waitlist and send occasional updates about the project.
-        </p>
-        <p>
-          Joining the waitlist does not create a financial account. We do not
-          collect identity documents, payment details, or financial information
-          through this site. We do not sell waitlist email addresses.
-        </p>
-        <p>
-          You can withdraw consent or request removal using the unsubscribe
-          option in any future email. A direct privacy contact channel will be
-          published before updates are sent.
-        </p>
-        <p>
-          This notice describes the current proof of concept and will be updated
-          before broader product launch.
-        </p>
-        <Link href="/#waitlist" className="text-link">
-          Back to waitlist →
-        </Link>
+      <main className="info-page">
+        <div className="container">
+          <span className="section-kicker">PRIVACY NOTICE</span>
+          <h1>Your information in this preview.</h1>
+          <p className="info-lede">
+            Regalvest processes account identity and activity needed for this
+            investor demonstration.
+          </p>
+          <div className="info-grid">
+            <section className="info-card">
+              <h2>Information collected</h2>
+              <p>
+                We store your name, normalized email address, password hash,
+                acceptance time, verification status, session records,
+                preferences and your simulated financial activity. Waitlist
+                emails and consent times are stored separately.
+              </p>
+            </section>
+            <section className="info-card">
+              <h2>How it is used</h2>
+              <p>
+                Account data enables sign-in, verification, password recovery
+                and a personal demo. Simulated activity is stored to keep your
+                dashboard consistent between visits. Waitlist email is used for
+                project updates only when you consent.
+              </p>
+            </section>
+            <section className="info-card">
+              <h2>Security</h2>
+              <p>
+                Passwords are hashed. Sessions are held in HttpOnly cookies.
+                Verification and reset tokens are stored only as hashes and
+                expire. No real payment or bank credentials are collected in the
+                demo.
+              </p>
+            </section>
+            <section className="info-card">
+              <h2>Retention and requests</h2>
+              <p>
+                A verified privacy contact channel and deletion workflow will be
+                published before broader launch. Until then, avoid entering
+                sensitive personal or financial information in demo fields.
+              </p>
+            </section>
+          </div>
+        </div>
       </main>
       <SiteFooter />
     </>

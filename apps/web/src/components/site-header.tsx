@@ -1,21 +1,19 @@
 import Link from "next/link";
 import { ArrowUpRight, Menu } from "lucide-react";
-
 const links = [
-  { href: "/#home", label: "Home" },
-  { href: "/#solutions", label: "Solutions" },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#roadmap", label: "Roadmap" },
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/products", label: "Products" },
+  { href: "/learn", label: "Learn" },
+  { href: "/business", label: "Business" },
+  { href: "/developers", label: "Developers" },
 ];
-
 export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <Link href="/#home" className="brand" aria-label="Regalvest 2.0 home">
-          <span className="brand-mark" aria-hidden="true">
-            R
-          </span>
+        <Link href="/" className="brand" aria-label="Regalvest 2.0 home">
+          <span className="brand-mark">R</span>
           <span>
             REGALVEST <span className="brand-version">2.0</span>
           </span>
@@ -27,9 +25,12 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <Link href="/#waitlist" className="header-cta">
-          Join waitlist <ArrowUpRight size={16} aria-hidden="true" />
-        </Link>
+        <div className="header-actions">
+          <Link href="/sign-in">Sign in</Link>
+          <Link href="/sign-up" className="header-cta">
+            Explore demo <ArrowUpRight size={16} />
+          </Link>
+        </div>
         <details className="mobile-nav">
           <summary aria-label="Open navigation">
             <Menu size={22} />
@@ -40,7 +41,8 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
-            <Link href="/#waitlist">Join waitlist</Link>
+            <Link href="/sign-in">Sign in</Link>
+            <Link href="/sign-up">Explore demo</Link>
           </nav>
         </details>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,19 +24,11 @@ export function WaitlistForm() {
     }
     setStatus("loading");
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl)
-        throw new Error(
-          "Waitlist is temporarily unavailable. Please try again later.",
-        );
-      const response = await fetch(
-        `${apiUrl.replace(/\/$/, "")}/api/v1/waitlist`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, consent }),
-        },
-      );
+      const response = await fetch("/api/v1/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, consent }),
+      });
       if (!response.ok) {
         if (response.status === 429)
           throw new Error("Too many attempts. Please try again in a minute.");
@@ -108,12 +101,12 @@ export function WaitlistForm() {
           className="text-sm leading-relaxed text-[#a6b7c0]"
         >
           I agree to receive Regalvest pre-launch updates by email. See our{" "}
-          <a
+          <Link
             href="/privacy"
             className="text-[#a9dbd3] underline underline-offset-4 hover:text-white"
           >
             privacy notice
-          </a>
+          </Link>
           .
         </label>
       </div>

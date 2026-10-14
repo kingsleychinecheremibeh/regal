@@ -74,6 +74,13 @@ export class AppController {
     };
   }
 
+  @Get("health/ready")
+  @ApiOperation({ summary: "Check API and PostgreSQL readiness" })
+  @ApiOkResponse({ type: HealthDto })
+  ready(): Promise<HealthDto> {
+    return this.health();
+  }
+
   @Get("products")
   @ApiOperation({
     summary:

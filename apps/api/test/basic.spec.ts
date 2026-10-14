@@ -17,6 +17,13 @@ describe("public MVP configuration and catalog", () => {
         CORS_ORIGINS: "http://localhost:3000",
       }).CORS_ORIGINS,
     ).toEqual(["http://localhost:3000"]);
+    expect(() =>
+      readConfig({
+        NODE_ENV: "production",
+        DATABASE_URL: "postgresql://localhost/regalvest",
+        CORS_ORIGINS: "https://example.com",
+      }),
+    ).toThrow("Invalid environment");
   });
 
   it("marks every published product category as planned", () => {

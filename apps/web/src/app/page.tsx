@@ -1,84 +1,51 @@
 import Link from "next/link";
 import {
-  ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
   BriefcaseBusiness,
-  CircleDollarSign,
-  Compass,
+  CreditCard,
   Globe2,
-  Layers3,
-  LockKeyhole,
-  MoveUpRight,
+  GraduationCap,
+  Landmark,
   ShieldCheck,
   Sparkles,
-  WalletCards,
-  Waypoints,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { WaitlistForm } from "@/components/waitlist-form";
 
-const solutions = [
+const products = [
   {
-    no: "01",
-    icon: Globe2,
-    name: "Borderless banking",
-    description:
-      "The vision for money that moves with you, across currencies and borders.",
-    items: [
-      "Multi-currency accounts",
-      "International transfers",
-      "Virtual & physical cards",
-    ],
-    className: "solution-card banking",
+    name: "TradeHub",
+    icon: TrendingUp,
+    text: "Explore simulated trading, prices and portfolio decisions.",
   },
   {
-    no: "02",
-    icon: CircleDollarSign,
-    name: "Wealth & investments",
-    description:
-      "One place to discover a broader world of potential opportunities.",
-    items: [
-      "Stocks & ETFs",
-      "Real estate & commodities",
-      "Agriculture investments",
-    ],
-    className: "solution-card wealth",
+    name: "RegalPay",
+    icon: Wallet,
+    text: "Preview a future way to manage payments and transfers.",
   },
   {
-    no: "03",
-    icon: Waypoints,
-    name: "Crypto & Web3",
-    description: "Thoughtful access to emerging digital asset possibilities.",
-    items: ["Cryptocurrency access", "Digital wallets", "Tokenized assets"],
-    className: "solution-card crypto",
+    name: "SmartSave",
+    icon: Landmark,
+    text: "Set goals and test savings habits with demo funds.",
   },
   {
-    no: "04",
-    icon: BriefcaseBusiness,
-    name: "Business tools",
-    description:
-      "A connected toolkit for businesses with ambitions beyond borders.",
-    items: [
-      "Invoicing & collection",
-      "Merchant services",
-      "Cross-border payroll",
-    ],
-    className: "solution-card business",
-  },
-  {
-    no: "05",
+    name: "Wealth",
     icon: Sparkles,
-    name: "Community & rewards",
-    description: "A future ecosystem built around participation and progress.",
-    items: [
-      "Rewards ecosystem",
-      "Community participation",
-      "Future governance",
-    ],
-    className: "solution-card community",
+    text: "Discover planned investment categories in one view.",
+  },
+  {
+    name: "Global Accounts",
+    icon: Globe2,
+    text: "See a concept for managing money across currencies.",
+  },
+  {
+    name: "Virtual Cards",
+    icon: CreditCard,
+    text: "Explore card controls with fictitious demo cards.",
   },
 ];
 
@@ -86,346 +53,212 @@ export default function HomePage() {
   return (
     <>
       <SiteHeader />
-      <main id="home">
-        <section className="hero-section">
-          <div className="hero-glow" aria-hidden="true" />
-          <div className="container hero-grid">
-            <div className="hero-copy">
-              <div className="eyebrow">
-                <span className="eyebrow-line" />A NEW VISION FOR FINANCE
-              </div>
+      <main>
+        <section className="new-hero">
+          <div className="container hero-layout">
+            <div>
+              <span className="pill">REGALVEST 2.0 · INVESTOR PREVIEW</span>
               <h1>
-                One platform.
-                <br />
-                <em>Borderless</em>
-                <br />
-                possibilities.
+                Finance without <em>the old borders.</em>
               </h1>
-              <p className="hero-lede">
-                Imagine a single place connecting African individuals and
-                businesses to global financial opportunities. That is the future
-                we are building toward.
+              <p>
+                Bridging Real-World Assets, Web3, and Global Finance. Explore a
+                connected financial vision built for African individuals and
+                businesses.
               </p>
-              <div className="hero-actions">
-                <Button asChild size="large">
-                  <Link href="#solutions">
-                    Explore Regalvest <ArrowUpRight size={18} />
-                  </Link>
-                </Button>
-                <Button asChild size="large" variant="outline">
-                  <Link href="#waitlist">
-                    Join the waitlist <ArrowRight size={18} />
-                  </Link>
-                </Button>
+              <div className="hero-buttons">
+                <Link className="orange-button" href="/sign-up">
+                  Explore the demo <ArrowUpRight size={18} />
+                </Link>
+                <Link className="outline-button" href="#ecosystem">
+                  Discover the ecosystem <ArrowRight size={18} />
+                </Link>
               </div>
-              <div className="hero-note">
-                <span className="pulse-dot" />
-                Pre-launch vision · Join us on the journey
-              </div>
+              <small>
+                Financial features are simulated. No real banking, trading or
+                investment service is available.
+              </small>
             </div>
             <div
-              className="hero-visual"
-              aria-label="Illustration of a future Regalvest financial dashboard; no live account data"
+              className="hero-dashboard"
+              aria-label="Illustrative dashboard preview"
             >
-              <div className="orbit orbit-one" />
-              <div className="orbit orbit-two" />
-              <div className="visual-float float-top">
-                <Globe2 size={18} />
-                <span>One connected world</span>
+              <div className="hero-dash-bar">
+                <span>REGALVEST / OVERVIEW</span>
+                <span>DEMO DATA</span>
               </div>
-              <div className="dashboard-shell">
-                <div className="dashboard-top">
-                  <div className="dash-logo">
-                    <span className="dash-logo-mark">R</span>
-                    <span>REGALVEST</span>
-                  </div>
-                  <span className="dash-tag">CONCEPT PREVIEW</span>
-                </div>
-                <div className="dash-body">
-                  <div className="dash-greeting">
-                    Your financial world, connected
-                  </div>
-                  <div className="dash-title">
-                    A clearer view of what&apos;s possible.
-                  </div>
-                  <div className="dash-chart" aria-hidden="true">
-                    <div className="chart-grid" />
-                    <svg viewBox="0 0 400 120" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient
-                          id="line-fill"
-                          x1="0"
-                          x2="0"
-                          y1="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="0"
-                            stopColor="#71b7ad"
-                            stopOpacity=".28"
-                          />
-                          <stop
-                            offset="1"
-                            stopColor="#71b7ad"
-                            stopOpacity="0"
-                          />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d="M0 105 C38 98 42 69 84 78 S132 95 166 58 S213 86 250 43 S315 59 350 24 S385 37 400 12 L400 120 L0 120Z"
-                        fill="url(#line-fill)"
-                      />
-                      <path
-                        d="M0 105 C38 98 42 69 84 78 S132 95 166 58 S213 86 250 43 S315 59 350 24 S385 37 400 12"
-                        fill="none"
-                        stroke="#82c6bb"
-                        strokeWidth="3"
-                      />
-                    </svg>
-                  </div>
-                  <div className="dash-tabs">
-                    <span>
-                      <WalletCards size={16} /> Banking
-                    </span>
-                    <span>
-                      <Layers3 size={16} /> Wealth
-                    </span>
-                    <span>
-                      <Waypoints size={16} /> Digital
-                    </span>
-                  </div>
-                </div>
+              <div className="hero-dash-balance">
+                <span>Total demo portfolio</span>
+                <strong>$100,000.00</strong>
+                <small>Illustrative balance</small>
               </div>
-              <div className="visual-float float-bottom">
-                <div className="float-icon">
-                  <Compass size={20} />
+              <div className="hero-dash-chart" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="hero-dash-cards">
+                <div>
+                  <span>SmartSave</span>
+                  <strong>Planned</strong>
                 </div>
                 <div>
-                  <strong>More possibilities</strong>
-                  <span>One connected vision</span>
+                  <span>TradeHub</span>
+                  <strong>Demo</strong>
                 </div>
-                <ArrowUpRight size={17} />
+                <div>
+                  <span>RegalPay</span>
+                  <strong>Planned</strong>
+                </div>
               </div>
             </div>
           </div>
-          <div className="container hero-bottom">
-            <span>BUILT FOR WHAT&apos;S NEXT</span>
-            <div>
-              <span>Explore the vision</span>
-              <ArrowDownRight size={18} />
-            </div>
-          </div>
         </section>
-
-        <section className="vision-strip">
-          <div className="container vision-strip-inner">
-            <div className="vision-intro">
-              <span className="section-kicker">THE BIGGER PICTURE</span>
-              <h2>
-                One ecosystem.
-                <br />
-                <em>More ways forward.</em>
-              </h2>
-            </div>
-            <p>
-              Financial life does not happen in silos. Our vision brings
-              everyday banking, opportunity, business, and community into one
-              considered experience.
-            </p>
-          </div>
-        </section>
-
-        <section id="solutions" className="solutions-section">
+        <section className="new-section" id="ecosystem">
           <div className="container">
-            <div className="section-heading">
-              <div>
-                <span className="section-kicker">EXPLORE THE ECOSYSTEM</span>
-                <h2>
-                  Designed to connect
-                  <br />
-                  <em>every possibility.</em>
-                </h2>
-              </div>
+            <div className="section-intro">
+              <span className="section-kicker">ONE CONNECTED ECOSYSTEM</span>
+              <h2>Many possibilities. One clear view.</h2>
               <p>
-                Five planned pillars, one ambitious platform. These capabilities
-                are part of the product vision and are not available yet.
+                Regalvest brings planned finance products into a single vision.
+                Try selected workflows using isolated demo data.
               </p>
             </div>
-            <div className="solutions-grid">
-              {solutions.map((solution) => (
-                <article className={solution.className} key={solution.no}>
-                  <div className="solution-top">
-                    <span className="solution-number">{solution.no} / 05</span>
-                    <span className="status-pill">PLANNED</span>
+            <div className="product-grid">
+              {products.map((item, index) => (
+                <article className="product-tile" key={item.name}>
+                  <div className="product-icon">
+                    <item.icon size={25} />
                   </div>
-                  <div className="solution-icon">
-                    <solution.icon size={25} strokeWidth={1.5} />
-                  </div>
-                  <h3>{solution.name}</h3>
-                  <p>{solution.description}</p>
-                  <ul>
-                    {solution.items.map((item) => (
-                      <li key={item}>
-                        <span />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="solution-bottom">
-                    <span>Explore the vision</span>
-                    <MoveUpRight size={18} />
-                  </div>
+                  <span className="tile-no">0{index + 1} / PLANNED</span>
+                  <h3>{item.name}</h3>
+                  <p>{item.text}</p>
+                  <Link href="/products">
+                    Explore concept <ArrowUpRight size={16} />
+                  </Link>
                 </article>
               ))}
             </div>
           </div>
         </section>
-
-        <section id="how-it-works" className="how-section">
-          <div className="container how-grid">
-            <div className="how-copy">
-              <span className="section-kicker">THE INTENDED EXPERIENCE</span>
-              <h2>
-                Simple by design.
-                <br />
-                <em>Powerful in reach.</em>
-              </h2>
+        <section className="new-section dark-section">
+          <div className="container split-section">
+            <div>
+              <span className="section-kicker">HOW IT WORKS</span>
+              <h2>See the experience. Understand the vision.</h2>
               <p>
-                This is the future product journey we are working toward. The
-                platform is currently in pre-launch development.
+                Register with a real account, verify your email, then explore a
+                personal dashboard. All financial actions use fictitious
+                balances and stay within the demo.
               </p>
-              <div className="how-callout">
-                <ShieldCheck size={21} />
+              <Link className="orange-button" href="/sign-up">
+                Create a demo account <ArrowRight size={18} />
+              </Link>
+            </div>
+            <div className="step-list">
+              <div>
+                <b>01</b>
                 <span>
-                  Built with clarity, trust, and accessibility in mind.
+                  <strong>Create your profile</strong>
+                  <small>Real registration and account security.</small>
+                </span>
+              </div>
+              <div>
+                <b>02</b>
+                <span>
+                  <strong>Open your workspace</strong>
+                  <small>Your own isolated simulated data.</small>
+                </span>
+              </div>
+              <div>
+                <b>03</b>
+                <span>
+                  <strong>Explore the future</strong>
+                  <small>Try demo trades, savings and rewards.</small>
                 </span>
               </div>
             </div>
-            <div className="steps">
-              {[
-                {
-                  n: "01",
-                  title: "Create your financial profile",
-                  text: "A future starting point tailored to your goals and needs.",
-                },
-                {
-                  n: "02",
-                  title: "Explore connected opportunities",
-                  text: "Discover planned financial tools and opportunities in one place.",
-                },
-                {
-                  n: "03",
-                  title: "Manage from one platform",
-                  text: "An intended unified view across your financial activities.",
-                },
-              ].map((step) => (
-                <div className="step" key={step.n}>
-                  <span className="step-number">{step.n}</span>
-                  <div>
-                    <h3>{step.title}</h3>
-                    <p>{step.text}</p>
-                  </div>
-                  <ArrowUpRight size={19} />
-                </div>
-              ))}
-            </div>
           </div>
         </section>
-
-        <section className="statement-section">
-          <div className="container statement-inner">
-            <div className="statement-icon">
-              <LockKeyhole size={25} />
-            </div>
-            <span>OUR NORTH STAR</span>
-            <p>
-              Financial possibility should move <em>as freely as ambition.</em>
-            </p>
-            <div className="statement-rule" />
-          </div>
-        </section>
-
-        <section id="roadmap" className="roadmap-section">
+        <section className="new-section">
           <div className="container">
-            <div className="section-heading">
-              <div>
-                <span className="section-kicker">THE JOURNEY AHEAD</span>
-                <h2>
-                  Building with
-                  <br />
-                  <em>intention.</em>
-                </h2>
-              </div>
-              <p>
-                A phased roadmap from platform foundation to a wider financial
-                ecosystem. Timelines depend on development, partnerships, and
-                applicable requirements.
-              </p>
+            <div className="section-intro">
+              <span className="section-kicker">BEYOND PERSONAL FINANCE</span>
+              <h2>Tools for growth and learning.</h2>
             </div>
-            <div className="roadmap-grid">
-              <article className="roadmap-card active">
-                <div className="roadmap-top">
-                  <span>PHASE 01</span>
-                  <span className="roadmap-dot" />
-                </div>
-                <h3>Platform foundation</h3>
+            <div className="feature-grid">
+              <Link href="/learn">
+                <GraduationCap size={28} />
+                <h3>Regalvest Academy</h3>
                 <p>
-                  Establish the brand, core experience, API foundations, and a
-                  community of early supporters.
+                  Financial learning experiences and market education are
+                  planned.
                 </p>
-                <span className="roadmap-status">CURRENT FOCUS</span>
-              </article>
-              <article className="roadmap-card">
-                <div className="roadmap-top">
-                  <span>PHASE 02</span>
-                  <span className="roadmap-dot" />
-                </div>
-                <h3>Financial integrations</h3>
+                <span>Explore learning →</span>
+              </Link>
+              <Link href="/business">
+                <BriefcaseBusiness size={28} />
+                <h3>Business tools</h3>
                 <p>
-                  Explore regulated partners and the infrastructure needed to
-                  bring banking and business capabilities to life.
+                  A future workspace for invoices, merchant services and
+                  cross-border payroll.
                 </p>
-                <span className="roadmap-status">PLANNED</span>
-              </article>
-              <article className="roadmap-card">
-                <div className="roadmap-top">
-                  <span>PHASE 03</span>
-                  <span className="roadmap-dot" />
-                </div>
-                <h3>Expanded ecosystem</h3>
+                <span>Explore business →</span>
+              </Link>
+              <Link href="/products">
+                <ShieldCheck size={28} />
+                <h3>VestPoints</h3>
                 <p>
-                  Explore broader investment offerings, digital assets, and
-                  community experiences as the platform matures.
+                  Preview a participation and rewards model with demo points.
                 </p>
-                <span className="roadmap-status">FUTURE VISION</span>
-              </article>
+                <span>Explore rewards →</span>
+              </Link>
             </div>
           </div>
         </section>
-
-        <section id="waitlist" className="waitlist-section">
-          <div className="container waitlist-panel">
-            <div className="waitlist-art" aria-hidden="true">
-              <div className="waitlist-ring ring-a" />
-              <div className="waitlist-ring ring-b" />
-              <div className="waitlist-ring ring-c" />
-              <div className="waitlist-center">R</div>
+        <section className="new-section roadmap-section" id="roadmap">
+          <div className="container">
+            <span className="section-kicker">PRODUCT ROADMAP</span>
+            <h2>Built in considered stages.</h2>
+            <div className="roadmap-line">
+              <div>
+                <b>Now</b>
+                <h3>Investor preview</h3>
+                <p>Real identity and a simulated product workspace.</p>
+              </div>
+              <div>
+                <b>Next</b>
+                <h3>Product validation</h3>
+                <p>Research, compliance and partner discussions.</p>
+              </div>
+              <div>
+                <b>Future</b>
+                <h3>Potential launches</h3>
+                <p>
+                  Only after required partnerships, licensing and operational
+                  readiness.
+                </p>
+              </div>
             </div>
-            <div className="waitlist-content">
-              <span className="section-kicker">
-                BE PART OF WHAT&apos;S NEXT
-              </span>
-              <h2>
-                The future is worth
-                <br />
-                <em>building together.</em>
-              </h2>
+          </div>
+        </section>
+        <section className="new-section waitlist-section" id="waitlist">
+          <div className="container split-section">
+            <div>
+              <span className="section-kicker">STAY IN THE LOOP</span>
+              <h2>Follow the Regalvest journey.</h2>
               <p>
-                Join the pre-launch waitlist for occasional product updates. No
-                account or financial service is available today.
+                Join the pre-launch waitlist for occasional updates. Creating a
+                demo account is separate from joining this list.
               </p>
-              <WaitlistForm />
             </div>
+            <WaitlistForm />
           </div>
         </section>
       </main>
