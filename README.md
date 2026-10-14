@@ -60,7 +60,7 @@ Schema changes use `pnpm.cmd db:generate` followed by review of the SQL migratio
 
 ## Deployment
 
-The older landing page and waitlist are live at [regalvest-web.onrender.com](https://regalvest-web.onrender.com); the older API is live at [regalvest-api.onrender.com](https://regalvest-api.onrender.com). **The expanded account and dashboard build is currently local and has not been deployed or live-verified.** Do not present the live URLs as the new full-stack version until deployment checks pass.
+The expanded account and dashboard build is live at [regalvest-web.onrender.com](https://regalvest-web.onrender.com), backed by [regalvest-api.onrender.com](https://regalvest-api.onrender.com). The private account sign-in, authenticated profile, protected dashboard, and logout were verified through the public web URL on October 14, 2026. Public signup and email recovery still need Resend. All financial actions remain simulations; see [docs/investor-evidence.md](docs/investor-evidence.md) for completed checks and limitations.
 
 The intended low-cost setup is Neon PostgreSQL plus Render API and web services. Vercel may host the Next.js frontend on a plan whose terms permit this investor-facing use. Use the same-origin `/api/v1` rewrite for auth cookies.
 
