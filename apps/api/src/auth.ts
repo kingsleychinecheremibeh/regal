@@ -219,8 +219,8 @@ export class AuthService {
     await this.sendEmail(
       to,
       purpose === "verify"
-        ? "Verify your Regalvest account"
-        : "Reset your Regalvest password",
+        ? "Verify your TurboXGlobal account"
+        : "Reset your TurboXGlobal password",
       purpose === "verify" ? "/verify" : "/reset-password",
       rawToken,
     );

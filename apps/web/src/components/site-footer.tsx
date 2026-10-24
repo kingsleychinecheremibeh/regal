@@ -1,40 +1,69 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
+
+const columns: [string, [string, string][]][] = [
+  [
+    "Company",
+    [
+      ["about", "About"],
+      ["blog", "Blog"],
+      ["careers", "Careers"],
+      ["faq", "FAQ"],
+    ],
+  ],
+  [
+    "Explore",
+    [
+      ["learn", "Learn"],
+      ["business", "Business"],
+      ["developers", "Developers"],
+      ["security", "Security"],
+    ],
+  ],
+  [
+    "Legal",
+    [
+      ["terms", "Terms of Use"],
+      ["privacy", "Privacy Notice"],
+    ],
+  ],
+  [
+    "Support",
+    [
+      ["help", "Help Center"],
+      ["contact", "Contact Support"],
+      ["faq", "FAQ"],
+    ],
+  ],
+];
+
 export function SiteFooter() {
   return (
-    <footer className="site-footer">
-      <div className="container footer-top">
-        <div>
-          <Link href="/" className="brand">
-            <span className="brand-mark">R</span>
-            <span>
-              REGALVEST <span className="brand-version">2.0</span>
-            </span>
-          </Link>
-          <p>Bridging Real-World Assets, Web3, and Global Finance.</p>
-        </div>
-        <nav aria-label="Footer navigation">
-          {[
-            "about",
-            "products",
-            "learn",
-            "business",
-            "developers",
-            "contact",
-            "faq",
-            "privacy",
-            "terms",
-          ].map((slug) => (
-            <Link href={`/${slug}`} key={slug}>
-              {slug[0].toUpperCase() + slug.slice(1)}
-            </Link>
+    <footer className="f">
+      <div className="wrap">
+        <div className="fg">
+          <div>
+            <Logo />
+            <p style={{ marginTop: 14 }}>
+              Trade. Pay. Hold. Invest. One platform for global money.
+            </p>
+          </div>
+          {columns.map(([title, links]) => (
+            <div key={title}>
+              <h4>{title}</h4>
+              {links.map(([slug, label]) => (
+                <Link key={slug + label} href={`/${slug}`}>
+                  {label}
+                </Link>
+              ))}
+            </div>
           ))}
-        </nav>
-      </div>
-      <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} Regalvest 2.0</span>
-        <span>
-          Investor preview · Financial features are simulated or planned.
-        </span>
+        </div>
+        <p style={{ marginTop: 34, fontSize: 14 }}>
+          © {new Date().getFullYear()} TurboXGlobal. Investor preview: all
+          financial activity on this site is simulated and has no monetary
+          value.
+        </p>
       </div>
     </footer>
   );

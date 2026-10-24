@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     ).replace(/\/$/, "");
     return [
       { source: "/api/v1/:path*", destination: `${target}/api/v1/:path*` },
+      { source: "/api/docs", destination: `${target}/api/docs` },
+      { source: "/api/docs/:path*", destination: `${target}/api/docs/:path*` },
     ];
   },
 };

@@ -1,30 +1,36 @@
 import {
-  Activity,
-  BookOpen,
-  BriefcaseBusiness,
+  Bell,
+  CircleHelp,
   CreditCard,
+  FileText,
   Gift,
   Globe2,
-  HandCoins,
-  LayoutDashboard,
+  House,
   Landmark,
-  Repeat2,
+  List,
   Settings,
+  Store,
   TrendingUp,
   Wallet,
 } from "lucide-react";
+
 export const modules = [
-  { slug: "overview", label: "Overview", icon: LayoutDashboard },
-  { slug: "markets", label: "Market Preview", icon: Activity },
-  { slug: "tradehub", label: "TradeHub", icon: Repeat2 },
-  { slug: "otc", label: "OTC Desk", icon: HandCoins },
-  { slug: "regalpay", label: "RegalPay", icon: Wallet },
-  { slug: "smartsave", label: "SmartSave", icon: Landmark },
-  { slug: "wealth", label: "Wealth", icon: TrendingUp },
+  { slug: "overview", label: "Overview", icon: House },
+  { slug: "tradehub", label: "TradeHUB", icon: TrendingUp },
+  { slug: "turboxpay", label: "TurboXPay", icon: Wallet },
+  { slug: "acquiring", label: "Fiat Acquiring", icon: Store, business: true },
   { slug: "accounts", label: "Global Accounts", icon: Globe2 },
   { slug: "cards", label: "Virtual Cards", icon: CreditCard },
-  { slug: "vestpoints", label: "VestPoints", icon: Gift },
-  { slug: "academy", label: "Academy", icon: BookOpen },
-  { slug: "business", label: "Business", icon: BriefcaseBusiness },
+  { slug: "wealth", label: "Wealth", icon: Landmark },
+  { slug: "transactions", label: "Transactions", icon: List },
+  { slug: "statements", label: "Statements and Reports", icon: FileText },
+  { slug: "notifications", label: "Notifications", icon: Bell },
+  { slug: "referrals", label: "Referrals and Rewards", icon: Gift },
+  { slug: "help", label: "Help and Support", icon: CircleHelp },
   { slug: "settings", label: "Settings", icon: Settings },
 ] as const;
+
+export type ModuleSlug = (typeof modules)[number]["slug"];
+
+export const moduleHref = (slug: string) =>
+  slug === "overview" ? "/dashboard" : `/dashboard/${slug}`;

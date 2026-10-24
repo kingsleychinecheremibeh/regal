@@ -10,7 +10,10 @@ import {
   SessionGuard,
   UsersController,
 } from "./auth";
-import { DemoController, DemoService } from "./demo";
+import { DemoController } from "./demo/controller";
+import { DemoCore } from "./demo/core";
+import { MoneyService } from "./demo/money";
+import { RecordsService } from "./demo/records";
 
 @Module({
   imports: [ThrottlerModule.forRoot([{ ttl: 60_000, limit: 5 }])],
@@ -21,7 +24,9 @@ import { DemoController, DemoService } from "./demo";
     WaitlistService,
     AuthService,
     SessionGuard,
-    DemoService,
+    DemoCore,
+    MoneyService,
+    RecordsService,
   ],
 })
 export class AppModule {}

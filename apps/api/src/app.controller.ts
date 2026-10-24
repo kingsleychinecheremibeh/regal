@@ -30,15 +30,27 @@ import {
   WaitlistResultDto,
 } from "./api.dto";
 import { Database } from "./db/database";
+import { contactMessages } from "./db/schema";
 import { products } from "./products";
 import { WaitlistService } from "./waitlist.service";
+
+const contactInput = z.strictObject({
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().toLowerCase().email().max(254),
+  message: z.string().trim().min(5).max(2000),
+  topic: z
+    .string()
+    .trim()
+    .regex(/^[a-z-]{2,40}$/)
+    .default("contact"),
+});
 
 const waitlistInput = z.strictObject({
   email: z.string().trim().toLowerCase().email().max(254),
   consent: z.literal(true),
 });
 
-@ApiTags("Regalvest MVP")
+@ApiTags("TurboXGlobal public")
 @ApiExtraModels(ProductDto)
 @Controller("api/v1")
 export class AppController {
@@ -53,7 +65,7 @@ export class AppController {
     type: HealthDto,
     example: {
       status: "ok",
-      service: "regalvest-api",
+      service: "turboxglobal-api",
       timestamp: "2026-10-13T12:00:00.000Z",
     },
   })
@@ -69,7 +81,7 @@ export class AppController {
     }
     return {
       status: "ok",
-      service: "regalvest-api",
+      service: "turboxglobal-api",
       timestamp: new Date().toISOString(),
     };
   }
@@ -126,5 +138,34 @@ export class AppController {
     }
     await this.waitlist.join(result.data.email);
     return { message: "Thanks for your interest. You are on the waitlist." };
+  }
+
+  @Post("contact")
+  @HttpCode(200)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @ApiOperation({ summary: "Send a message from a public contact form" })
+  @ApiBody({
+    schema: {
+      type: "object",
+      example: {
+        name: "Ada Investor",
+        email: "ada@example.com",
+        message: "I would like a walkthrough.",
+        topic: "business",
+      },
+    },
+  })
+  @ApiOkResponse({ type: WaitlistResultDto })
+  @ApiBadRequestResponse({ type: ErrorDto })
+  @ApiTooManyRequestsResponse({ type: ErrorDto })
+  async contact(@Body() body: unknown): Promise<WaitlistResultDto> {
+    const result = contactInput.safeParse(body);
+    if (!result.success)
+      throw new BadRequestException(
+        "Enter your name, a valid email and a message.",
+      );
+    await this.database.db.insert(contactMessages).values(result.data);
+    return { message: "Thank you. We will reply by email." };
   }
 }

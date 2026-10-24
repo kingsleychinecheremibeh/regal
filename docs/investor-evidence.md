@@ -1,4 +1,30 @@
-# Investor evidence — Regalvest 2.0
+# Investor evidence
+
+## TurboXGlobal rebuild (October 24, 2026)
+
+The site and dashboard were rebuilt to the client's TurboXGlobal references. The changes:
+
+- **Public site:** new brand, mega-menu, and product, company and legal pages.
+- **Contact form:** stored server-side and throttled.
+- **Dashboard:** 13 sections.
+- **Simulated features:** a multi-asset ledger, trading, payments, global accounts, cards, wealth, statements, and KYC/KYB verification with a labelled demo reviewer.
+- **Migration:** additive migration `0003_turboxglobal`.
+
+Completed checks:
+
+- API and web TypeScript checks passed.
+- API and web lint passed. One deliberate full-page redirect on session expiry is annotated.
+- The Next.js production build and the API build passed.
+- The generated migration was reviewed. It only creates tables, adds nullable or defaulted columns, and adds indexes and foreign keys.
+- Pure helper checks passed: decimal parsing to 1e-8 units, rejection of invalid amounts, fixed-price conversion and chart series.
+
+Not yet done:
+
+- **Integration tests:** they were rewritten for the new flows (gating, KYC review and funding, idempotent trades, concurrent duplicate payments, over-limit failure, cross-user isolation, card decline, statements, KYB gating and reset). They have not been run, because no isolated test database was available in this session.
+- **Browser walkthrough:** not done.
+- **Production:** the migration has not been applied and the build has not been deployed.
+
+## Earlier Regalvest 2.0 build
 
 ## Current source build
 

@@ -24,5 +24,5 @@ export default async function DashboardLayout({
     /* A failed API lookup must never open the dashboard. */
   }
   if (!user) redirect("/sign-in?next=/dashboard");
-  return <DashboardShell user={user}>{children}</DashboardShell>;
+  return <DashboardShell>{children}</DashboardShell>;
 }

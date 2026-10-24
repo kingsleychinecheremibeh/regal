@@ -2,10 +2,6 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -19,7 +15,7 @@ export function WaitlistForm() {
     event.preventDefault();
     setError("");
     if (!consent) {
-      setError("Please agree to receive pre-launch updates.");
+      setError("Please agree to receive launch updates.");
       return;
     }
     setStatus("loading");
@@ -48,26 +44,23 @@ export function WaitlistForm() {
     }
   }
 
-  if (status === "success") {
+  if (status === "success")
     return (
-      <div
-        role="status"
-        className="flex items-center gap-3 rounded-2xl border border-[#6aaea4]/40 bg-[#6aaea4]/10 p-5 text-[#dbf8f1]"
-      >
-        <CheckCircle2 className="size-6 shrink-0 text-[#8bd3c6]" />
-        <span>Thanks for your interest. You are on the waitlist.</span>
+      <div className="notice ok" role="status">
+        Thanks for your interest. You are on the launch list.
       </div>
     );
-  }
 
   return (
-    <form onSubmit={submit} className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row">
+    <form onSubmit={submit} className="waitlist">
+      <div className="row">
         <label htmlFor="waitlist-email" className="sr-only">
           Email address
         </label>
-        <Input
+        <input
           id="waitlist-email"
+          className="grow"
+          style={{ minWidth: 220, width: "auto" }}
           name="email"
           type="email"
           autoComplete="email"
@@ -78,43 +71,29 @@ export function WaitlistForm() {
           onChange={(event) => setEmail(event.target.value)}
           disabled={status === "loading"}
         />
-        <Button
+        <button
+          className="btn btn-p btn-lg"
           type="submit"
-          size="large"
-          className="shrink-0"
           disabled={status === "loading"}
         >
-          {status === "loading" ? "Joining…" : "Join the waitlist"}
-          <ArrowRight className="size-4" />
-        </Button>
+          {status === "loading" ? "Joining…" : "Join the launch list"}
+        </button>
       </div>
-      <div className="flex items-start gap-3">
-        <Checkbox
-          id="waitlist-consent"
+      <label className="check mt">
+        <input
+          type="checkbox"
           checked={consent}
-          onCheckedChange={(checked) => setConsent(checked === true)}
+          onChange={(event) => setConsent(event.target.checked)}
           disabled={status === "loading"}
-          aria-required="true"
         />
-        <label
-          htmlFor="waitlist-consent"
-          className="text-sm leading-relaxed text-[#a6b7c0]"
-        >
-          I agree to receive Regalvest pre-launch updates by email. See our{" "}
-          <Link
-            href="/privacy"
-            className="text-[#a9dbd3] underline underline-offset-4 hover:text-white"
-          >
-            privacy notice
-          </Link>
-          .
-        </label>
-      </div>
-      {error && (
-        <p role="alert" className="text-sm text-[#ffb9a7]">
-          {error}
-        </p>
-      )}
+        <span className="mut">
+          I agree to receive TurboXGlobal launch updates by email. See the{" "}
+          <Link href="/privacy">privacy notice</Link>.
+        </span>
+      </label>
+      <p className="err-t" role="alert">
+        {error}
+      </p>
     </form>
   );
 }

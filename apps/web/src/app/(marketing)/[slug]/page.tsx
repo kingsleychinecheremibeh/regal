@@ -1,18 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { Suspense } from "react";
 import { AuthForm } from "@/components/auth-form";
+import { ContactForm } from "@/components/contact-form";
+import { FaqList } from "@/components/faq-list";
+import { Logo } from "@/components/logo";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { SiteIcon } from "@/components/site-icon";
+import { Steps } from "@/components/steps";
+import { glossary, pages } from "@/lib/site-content";
 
 const modes = {
   "sign-up": {
-    title: "Create your Regalvest account",
-    note: "Your identity is real. All financial features inside are simulations.",
+    title: "Create your account",
+    note: "Your account is real. Everything financial inside is a simulation.",
   },
   "sign-in": {
-    title: "Welcome back",
-    note: "Sign in to your personal demo workspace.",
+    title: "Sign in",
+    note: "Welcome back to your TurboXGlobal preview.",
   },
   "forgot-password": {
     title: "Reset your password",
@@ -32,237 +39,148 @@ const modes = {
   },
 } as const;
 
-const pages = {
-  about: {
-    kicker: "ABOUT REGALVEST",
-    title: "A broader financial future, designed with Africa in mind.",
-    intro:
-      "Regalvest 2.0 is a proposed connected platform for global financial access. This investor preview demonstrates the product direction while operational services remain in development.",
-    cards: [
-      [
-        "Our perspective",
-        "People and businesses should be able to understand and navigate financial possibilities from one coherent place.",
-      ],
-      [
-        "Our current stage",
-        "The website includes real account identity and an isolated financial simulation. Regulated products require further validation, partners and approvals.",
-      ],
-      [
-        "Our principles",
-        "Clear information, responsible design and honest communication about what is available today.",
-      ],
-    ],
-  },
-  products: {
-    kicker: "THE ECOSYSTEM",
-    title: "One platform vision. Distinct product paths.",
-    intro:
-      "Every financial capability below is planned or simulated for this investor preview.",
-    cards: [
-      [
-        "TradeHub",
-        "Demo trading, market-style views, P2P and staking concepts.",
-      ],
-      ["RegalPay", "Payment, airtime, utility and global transfer concepts."],
-      ["SmartSave", "Interactive demo savings goals and balance transfers."],
-      [
-        "Wealth",
-        "Planned access to stocks, ETFs, property, agriculture and commodities.",
-      ],
-      ["Global Accounts", "Illustrative multi-currency account interface."],
-      [
-        "Virtual Cards",
-        "Fictitious card management controls without payment credentials.",
-      ],
-      ["VestPoints", "Demo participation rewards with a daily check-in."],
-      ["Academy", "Financial education and learning concepts."],
-    ],
-  },
-  learn: {
-    kicker: "REGALVEST ACADEMY",
-    title: "Build confidence before making decisions.",
-    intro:
-      "Explore the learning direction for Regalvest. These course topics are previews, and no live news or third-party feed is connected.",
-    cards: [
-      [
-        "Understanding risk",
-        "Learn how risk and uncertainty affect financial choices.",
-      ],
-      [
-        "Cross-border basics",
-        "Understand currencies, conversion and transfer concepts.",
-      ],
-      ["Savings habits", "Explore goals, time horizons and consistency."],
-      [
-        "Digital assets",
-        "Get familiar with the vocabulary and tradeoffs of Web3.",
-      ],
-    ],
-  },
-  business: {
-    kicker: "FOR BUSINESS",
-    title: "A concept workspace for businesses going further.",
-    intro:
-      "The investor demo previews business tools. No live merchant collection, invoicing or payroll service is available.",
-    cards: [
-      ["Invoicing", "A planned flow for creating and tracking invoices."],
-      ["Merchant tools", "A future view of business collections and activity."],
-      ["Payroll", "Explore a possible cross-border payroll workflow."],
-      ["Developer access", "Read the current demo API documentation."],
-    ],
-  },
-  developers: {
-    kicker: "FOR DEVELOPERS",
-    title: "Explore the investor demo API.",
-    intro:
-      "The API currently supports real account identity, a waitlist and isolated simulated financial data. Financial endpoints cannot move real funds.",
-    cards: [
-      ["REST API", "Versioned endpoints under /api/v1."],
-      ["OpenAPI", "View the API schema and examples in Swagger."],
-      [
-        "Demo boundary",
-        "There are no live banking, payment, trading or custody integrations.",
-      ],
-    ],
-  },
-  contact: {
-    kicker: "CONTACT",
-    title: "Stay connected to the project.",
-    intro:
-      "A verified public contact channel has not been published yet. Join the waitlist for project updates; please do not send personal financial information.",
-    cards: [
-      [
-        "Project updates",
-        "The waitlist records your email and explicit consent.",
-      ],
-      [
-        "Support",
-        "Account and product support channels will be published before a wider launch.",
-      ],
-    ],
-  },
-  faq: {
-    kicker: "FREQUENTLY ASKED QUESTIONS",
-    title: "Understand what this preview does.",
-    intro: "Answers about the current investor demonstration.",
-    cards: [
-      [
-        "Can I move real money?",
-        "No. Every financial balance and action is simulated.",
-      ],
-      [
-        "Is my account real?",
-        "Registration, email verification and sessions use real account data once email delivery is configured.",
-      ],
-      [
-        "Are market prices live?",
-        "No. All displayed market figures are fixed illustrative examples.",
-      ],
-      [
-        "Is Regalvest licensed?",
-        "This preview makes no licensing or regulated-service claim.",
-      ],
-      [
-        "Can I reset my demo?",
-        "Yes. Use Reset demo data in dashboard settings.",
-      ],
-    ],
-  },
-  terms: {
-    kicker: "TERMS OF USE",
-    title: "Terms for this investor preview.",
-    intro:
-      "By creating an account, you agree to use this site only as a product demonstration. You must be at least 18 years old.",
-    cards: [
-      [
-        "Simulated services",
-        "Demo balances, orders, cards, rewards and transactions have no monetary value and cannot be redeemed or transferred outside this site.",
-      ],
-      [
-        "No financial advice",
-        "Illustrative content is not investment, legal or tax advice.",
-      ],
-      [
-        "Account security",
-        "Keep your password private and notify the project through a verified support channel when one becomes available if you suspect misuse.",
-      ],
-      [
-        "Availability",
-        "Features may change during development. No financial product is promised by this preview.",
-      ],
-    ],
-  },
-} as const;
+type Params = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
   return [...Object.keys(pages), ...Object.keys(modes)].map((slug) => ({
     slug,
   }));
 }
-export default async function InformationPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const { slug } = await params;
+  const title =
+    slug in modes
+      ? modes[slug as keyof typeof modes].title
+      : pages[slug]?.title;
+  return title ? { title: `${title} · TurboXGlobal` } : {};
+}
+
+export default async function InformationPage({ params }: Params) {
   const { slug } = await params;
   if (slug in modes) {
     const mode = slug as keyof typeof modes;
     return (
-      <main className="auth-page">
-        <Link href="/" className="auth-brand">
-          R / REGALVEST 2.0
-        </Link>
-        <section className="auth-card">
-          <span className="demo-label">INVESTOR DEMO</span>
-          <h1>{modes[mode].title}</h1>
-          <p>{modes[mode].note}</p>
-          <Suspense fallback={<p>Loading form…</p>}>
-            <AuthForm mode={mode} />
-          </Suspense>
-        </section>
+      <main className="auth" id="main">
+        <div className="auth-box">
+          <Logo />
+          <div className="card pad" style={{ padding: 28 }}>
+            <h2>{modes[mode].title}</h2>
+            <p className="mut">{modes[mode].note}</p>
+            <Suspense fallback={<p className="mut">Loading form…</p>}>
+              <AuthForm mode={mode} />
+            </Suspense>
+          </div>
+        </div>
       </main>
     );
   }
-  if (!(slug in pages)) notFound();
-  const page = pages[slug as keyof typeof pages];
+  const page = pages[slug];
+  if (!page) notFound();
   return (
     <>
       <SiteHeader />
-      <main className="info-page">
-        <div className="container">
-          <span className="section-kicker">{page.kicker}</span>
-          <h1>{page.title}</h1>
-          <p className="info-lede">{page.intro}</p>
-          <div className="info-grid">
-            {page.cards.map(([title, copy]) => (
-              <section key={title} className="info-card">
-                <h2>{title}</h2>
-                <p>{copy}</p>
-              </section>
-            ))}
-          </div>
-          <div className="info-cta">
-            <p>See how the connected experience might work.</p>
-            <Link className="orange-button" href="/sign-up">
-              Explore the demo →
-            </Link>
-            {slug === "developers" && (
-              <a
-                className="outline-button"
-                href="https://regalvest-api.onrender.com/api/docs"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open API docs ↗
-              </a>
-            )}
-            {slug === "contact" && (
-              <Link className="outline-button" href="/#waitlist">
-                Join waitlist →
-              </Link>
+      <main id="main">
+        <div className="band">
+          <div className="wrap">
+            <div className="ic">
+              <SiteIcon name={page.icon} />
+            </div>
+            <h1>{page.title}</h1>
+            <p>{page.lead}</p>
+            {page.cta && (
+              <div className="row">
+                <Link className="btn btn-p btn-lg" href="/sign-up">
+                  Get Started
+                </Link>
+                <Link className="btn btn-w btn-lg" href="/sign-in">
+                  Try it in the preview
+                </Link>
+              </div>
             )}
           </div>
         </div>
+        <section className="s">
+          <div className="wrap">
+            {page.features.length > 0 && (
+              <div className="grid g2">
+                {page.features.map(([title, text]) => (
+                  <div className="card tile" key={title}>
+                    <h3>{title}</h3>
+                    <p className="mut m0">{text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {page.steps.length > 0 && (
+              <>
+                <h2 className="h2" style={{ marginTop: 56 }}>
+                  How it works
+                </h2>
+                <Steps items={page.steps} />
+              </>
+            )}
+            {page.legal && (
+              <div className="prose">
+                {page.legal.map(([title, text]) => (
+                  <div key={title}>
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {slug === "learn" && (
+              <>
+                <h2 className="h2">Getting started</h2>
+                <Steps
+                  items={[
+                    "Create your account and confirm your email.",
+                    "Verify your profile with your ID.",
+                    "Fund your account, then pick a product.",
+                  ]}
+                />
+                <h2 className="h2" style={{ marginTop: 56 }}>
+                  Glossary
+                </h2>
+                <div className="grid g2">
+                  {glossary.map(([term, text]) => (
+                    <div className="card tile" key={term}>
+                      <h3>{term}</h3>
+                      <p className="mut m0">{text}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+            {slug === "faq" && (
+              <div className="prose">
+                <FaqList />
+              </div>
+            )}
+            {slug === "developers" && (
+              <p className="mt2">
+                <a
+                  className="btn btn-s"
+                  href="/api/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open the preview API reference ↗
+                </a>
+              </p>
+            )}
+            {page.form && (
+              <div
+                className="card tile"
+                style={{ maxWidth: 560, marginTop: 40 }}
+              >
+                <h3>{page.form}</h3>
+                <ContactForm topic={slug} />
+              </div>
+            )}
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </>

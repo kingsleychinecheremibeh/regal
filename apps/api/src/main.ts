@@ -19,14 +19,14 @@ async function bootstrap(): Promise<void> {
   app.use(helmet());
   app.enableCors({
     origin: config.CORS_ORIGINS,
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Idempotency-Key"],
     credentials: true,
   });
   app.useGlobalFilters(new ApiErrorFilter());
 
   const openApiConfig = new DocumentBuilder()
-    .setTitle("Regalvest 2.0 Investor Demo API")
+    .setTitle("TurboXGlobal Investor Preview API")
     .setDescription(
       "Real account identity and isolated financial simulations. No real money movement or investment service.",
     )

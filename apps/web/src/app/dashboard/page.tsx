@@ -1,4 +1,5 @@
-import { DashboardPanel } from "@/components/dashboard-panel";
+import { ModuleView } from "@/components/dashboard/module-view";
+
 export default function Page() {
-  return <DashboardPanel module="overview" />;
+  return <ModuleView module="overview" />;
 }

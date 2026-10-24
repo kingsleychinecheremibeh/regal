@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class HealthDto {
   @ApiProperty({ type: String, example: "ok" }) status!: "ok";
-  @ApiProperty({ type: String, example: "regalvest-api" }) service!: string;
+  @ApiProperty({ type: String, example: "turboxglobal-api" }) service!: string;
   @ApiProperty({ type: String, example: "2026-10-13T12:00:00.000Z" })
   timestamp!: string;
 }

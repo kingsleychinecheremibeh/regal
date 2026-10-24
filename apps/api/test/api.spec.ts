@@ -83,7 +83,7 @@ integration("Regalvest API with isolated PostgreSQL", () => {
     expect(health.status).toBe(200);
     expect(await health.json()).toMatchObject({
       status: "ok",
-      service: "regalvest-api",
+      service: "turboxglobal-api",
     });
     const products = await fetch(`${baseUrl}/api/v1/products`);
     expect(products.status).toBe(200);
@@ -99,6 +99,7 @@ integration("Regalvest API with isolated PostgreSQL", () => {
     );
     expect(Object.keys(document.paths)).toContain("/api/v1/auth/register");
     expect(Object.keys(document.paths)).toContain("/api/v1/demo/overview");
+    expect(Object.keys(document.paths)).toContain("/api/v1/contact");
     expect(
       document.paths["/api/v1/auth/register"].post?.requestBody,
     ).toBeDefined();
@@ -323,102 +324,246 @@ integration("Regalvest API with isolated PostgreSQL", () => {
     });
     const otherCookie = otherLogin.headers.get("set-cookie")!.split(";")[0];
 
-    const action = { amountMinor: 1234, description: "Demo savings deposit" };
-    expect(
-      (await post("demo/savings/deposit", action, cookie, "deposit-test-0001"))
-        .status,
-    ).toBe(201);
-    expect(
-      (await post("demo/savings/deposit", action, cookie, "deposit-test-0001"))
-        .status,
-    ).toBe(201);
-    const overview = (await (
-      await fetch(`${baseUrl}/api/v1/demo/overview`, {
-        headers: { Cookie: cookie },
-      })
-    ).json()) as {
-      balances: { cashMinor: number; savingsMinor: number };
-      transactions: object[];
+    const call = async (
+      method: string,
+      path: string,
+      who: string,
+      body?: object,
+      key?: string,
+    ) => {
+      const response = await fetch(`${baseUrl}/api/v1/${path}`, {
+        method,
+        headers: {
+          Origin: "http://localhost:3000",
+          Cookie: who,
+          ...(body ? { "Content-Type": "application/json" } : {}),
+          ...(key ? { "Idempotency-Key": key } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const text = await response.text();
+      const json = text.startsWith("{") || text.startsWith("[");
+      return {
+        status: response.status,
+        text,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        body: (json ? JSON.parse(text) : {}) as any,
+      };
     };
-    expect(overview.balances.cashMinor).toBe(10000000 - 1234);
-    expect(overview.balances.savingsMinor).toBe(1234);
-    expect(overview.transactions).toHaveLength(1);
-    const goalResponse = await post(
-      "demo/savings/goals",
-      { name: "Test goal", targetMinor: 5000 },
+    type Holding = { asset: string; quantity: number };
+    const holdings = async (who: string): Promise<Record<string, number>> =>
+      Object.fromEntries(
+        (
+          (await call("GET", "demo/overview", who)).body.holdings as Holding[]
+        ).map((h) => [h.asset, h.quantity]),
+      );
+
+    // Products stay locked until KYC is approved.
+    const state = await call("GET", "demo/state", cookie);
+    expect(state.status).toBe(200);
+    expect(state.body.verification).toMatchObject({
+      kyc: { status: "not_started" },
+      kyb: null,
+    });
+    expect(
+      (
+        await call(
+          "POST",
+          "demo/trades",
+          cookie,
+          { side: "buy", symbol: "BTC", quantity: "0.01" },
+          "locked-trade-0001",
+        )
+      ).status,
+    ).toBe(403);
+    expect(await holdings(cookie)).toEqual({});
+
+    // KYC: steps are validated, document numbers are masked, then reviewed.
+    expect(
+      (await call("POST", "demo/verification/kyc/submit", cookie)).status,
+    ).toBe(400);
+    const file = { name: "sample.pdf", type: "application/pdf", size: 1000 };
+    expect(
+      (
+        await call("PUT", "demo/verification/kyc/document", cookie, {
+          type: "passport",
+          country: "Nigeria",
+          number: "A12345678",
+          file,
+        })
+      ).status,
+    ).toBe(200);
+    await call("PUT", "demo/verification/kyc/selfie", cookie, {
+      method: "sample",
+    });
+    await call("PUT", "demo/verification/kyc/questionnaire", cookie, {
+      occupation: "Analyst",
+      sourceOfFunds: "salary",
+      purpose: "all",
+      politicallyExposed: false,
+    });
+    const draft = await call("GET", "demo/verification", cookie);
+    expect(draft.text).not.toContain("A12345678");
+    expect(
+      (await call("POST", "demo/verification/kyc/submit", cookie)).status,
+    ).toBe(200);
+    expect(
+      (
+        await call("POST", "demo/verification/kyc/review", cookie, {
+          decision: "rejected",
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await call("POST", "demo/verification/kyc/review", cookie, {
+          decision: "verified",
+        })
+      ).status,
+    ).toBe(200);
+    const funded = await holdings(cookie);
+    expect(funded.USD).toBe(12480.55);
+    expect(funded.BTC).toBe(0.0842);
+
+    // A buy debits USD with the 0.5% fee and credits the asset once per key.
+    const buy = { side: "buy", symbol: "ETH", quantity: "0.5" };
+    expect(
+      (await call("POST", "demo/trades", cookie, buy, "buy-test-0001")).status,
+    ).toBe(200);
+    expect(
+      (await call("POST", "demo/trades", cookie, buy, "buy-test-0001")).body,
+    ).toMatchObject({ duplicate: true });
+    const afterBuy = await holdings(cookie);
+    expect(afterBuy.ETH).toBe(1.85);
+    expect(afterBuy.USD).toBeCloseTo(12480.55 - 1560.38 - 7.8, 2);
+
+    // Invalid swaps and oversells are refused.
+    expect(
+      (
+        await call(
+          "POST",
+          "demo/trades",
+          cookie,
+          { side: "swap", from: "SOL", to: "SOL", quantity: "1" },
+          "swap-test-0001",
+        )
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await call(
+          "POST",
+          "demo/trades",
+          cookie,
+          { side: "sell", symbol: "BTC", quantity: "5" },
+          "sell-test-0001",
+        )
+      ).status,
+    ).toBe(400);
+
+    // Payments: concurrent duplicates create one ledger row; over-limit fails.
+    const beneficiary = await call("POST", "demo/beneficiaries", cookie, {
+      name: "Anna Keller",
+      country: "Germany",
+      currency: "EUR",
+      account: "DE89 3704 0044 0532 0130 00",
+    });
+    expect(beneficiary.status).toBe(201);
+    expect(beneficiary.body.accountLast4).toBe("3000");
+    const payment = {
+      kind: "transfer",
+      beneficiaryId: beneficiary.body.id,
+      currency: "USD",
+      amount: "100",
+    };
+    const concurrent = await Promise.all([
+      call("POST", "demo/payments", cookie, payment, "pay-test-0001"),
+      call("POST", "demo/payments", cookie, payment, "pay-test-0001"),
+    ]);
+    expect(concurrent.map((r) => r.status)).toEqual([200, 200]);
+    expect(
+      (await call("GET", "demo/transactions?type=transfer", cookie)).body.total,
+    ).toBe(1);
+    const overLimit = await call(
+      "POST",
+      "demo/payments",
+      cookie,
+      { ...payment, amount: "6000" },
+      "pay-test-0002",
+    );
+    expect(overLimit.body).toMatchObject({ status: "failed" });
+    expect((await holdings(cookie)).USD).toBeCloseTo(afterBuy.USD - 101, 2);
+
+    // Another user cannot see or use this user's records.
+    expect(
+      (
+        await call(
+          "DELETE",
+          `demo/beneficiaries/${beneficiary.body.id}`,
+          otherCookie,
+        )
+      ).status,
+    ).toBe(404);
+    expect(
+      (await call("POST", "demo/payments/quote", otherCookie, payment)).status,
+    ).toBe(404);
+    const otherCsv = await call(
+      "GET",
+      "demo/transactions/export.csv",
+      otherCookie,
+    );
+    expect(otherCsv.status).toBe(200);
+    expect(otherCsv.text).not.toContain("Anna Keller");
+    const csv = await call("GET", "demo/transactions/export.csv", cookie);
+    expect(csv.text).toContain("Transfer to Anna Keller");
+
+    // Cards: frozen cards decline simulated purchases.
+    const card = await call("POST", "demo/cards", cookie, { label: "Online" });
+    expect(card.status).toBe(201);
+    await call("PATCH", `demo/cards/${card.body.id}`, cookie, {
+      frozen: true,
+    });
+    const declined = await call(
+      "POST",
+      `demo/cards/${card.body.id}/purchase`,
+      cookie,
+      undefined,
+      "purchase-test-0001",
+    );
+    expect(declined.body).toMatchObject({ status: "failed" });
+    expect(
+      (
+        await call("PATCH", `demo/cards/${card.body.id}`, otherCookie, {
+          frozen: false,
+        })
+      ).status,
+    ).toBe(404);
+
+    // Statements are generated from the ledger.
+    const month = new Date().toISOString().slice(0, 7);
+    const statement = await call(
+      "GET",
+      `demo/statements/${month}?account=USD&format=csv`,
       cookie,
     );
-    expect(goalResponse.status).toBe(201);
-    const goal = (await goalResponse.json()) as { id: string };
+    expect(statement.status).toBe(200);
+    expect(statement.text).toContain("Opening demo balance (USD)");
+
+    // Fiat Acquiring needs a business account and an approved KYB case.
+    expect((await call("GET", "demo/acquiring", cookie)).status).toBe(403);
+    await call("PATCH", "demo/profile", cookie, {
+      accountType: "business",
+      businessName: "Test Ltd",
+    });
+    expect((await call("GET", "demo/acquiring", cookie)).status).toBe(403);
     expect(
-      (
-        await post(
-          "demo/savings/deposit",
-          { ...action, amountMinor: 500, goalId: goal.id },
-          cookie,
-          "goal-deposit-0001",
-        )
-      ).status,
-    ).toBe(201);
-    const allocated = (await (
-      await fetch(`${baseUrl}/api/v1/demo/overview`, {
-        headers: { Cookie: cookie },
-      })
-    ).json()) as {
-      balances: { savingsMinor: number };
-      goals: { savedMinor: number }[];
-    };
-    expect(allocated.balances.savingsMinor).toBe(1734);
-    expect(allocated.goals[0].savedMinor).toBe(500);
-    const concurrent = await Promise.all([
-      post(
-        "demo/savings/deposit",
-        { ...action, amountMinor: 250 },
-        cookie,
-        "concurrent-deposit-0001",
-      ),
-      post(
-        "demo/savings/deposit",
-        { ...action, amountMinor: 250 },
-        cookie,
-        "concurrent-deposit-0001",
-      ),
-    ]);
-    expect(concurrent.map((response) => response.status)).toEqual([201, 201]);
-    const afterConcurrent = (await (
-      await fetch(`${baseUrl}/api/v1/demo/overview`, {
-        headers: { Cookie: cookie },
-      })
-    ).json()) as { balances: { savingsMinor: number }; transactions: object[] };
-    expect(afterConcurrent.balances.savingsMinor).toBe(1984);
-    expect(afterConcurrent.transactions).toHaveLength(3);
-    expect(
-      (
-        await post(
-          "demo/savings/withdraw",
-          { amountMinor: 1500, description: "Unallocated withdrawal" },
-          cookie,
-          "goal-withdraw-0001",
-        )
-      ).status,
-    ).toBe(400);
-    const otherOverview = (await (
-      await fetch(`${baseUrl}/api/v1/demo/overview`, {
-        headers: { Cookie: otherCookie },
-      })
-    ).json()) as { balances: { savingsMinor: number }; transactions: object[] };
-    expect(otherOverview.balances.savingsMinor).toBe(0);
-    expect(otherOverview.transactions).toHaveLength(0);
-    expect(
-      (
-        await post(
-          "demo/savings/deposit",
-          { amountMinor: 100000000, description: "Too much" },
-          cookie,
-          "deposit-test-0002",
-        )
-      ).status,
-    ).toBe(400);
+      (await call("GET", "demo/verification", cookie)).body.kyb,
+    ).toMatchObject({ status: "not_started" });
+
+    // Resetting balances keeps verification and restores opening funds.
+    expect((await call("POST", "demo/reset", cookie, {})).status).toBe(200);
+    expect((await holdings(cookie)).USD).toBe(12480.55);
+    expect((await call("GET", "demo/transactions", cookie)).body.total).toBe(7);
 
     expect(
       (await post("auth/forgot-password", { email: accountEmail })).status,

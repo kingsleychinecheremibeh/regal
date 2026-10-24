@@ -85,9 +85,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }
 
   return (
-    <form className="auth-form" onSubmit={submit}>
+    <form onSubmit={submit}>
       {mode === "sign-up" && (
-        <label>
+        <label className="field">
           Full name
           <input
             name="fullName"
@@ -104,13 +104,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
         "forgot-password",
         "resend-verification",
       ].includes(mode) && (
-        <label>
+        <label className="field">
           Email
           <input name="email" type="email" autoComplete="email" required />
         </label>
       )}
       {["sign-up", "sign-in", "reset-password"].includes(mode) && (
-        <label>
+        <label className="field">
           Password
           <input
             name="password"
@@ -125,7 +125,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       )}
       {mode === "sign-up" && (
         <>
-          <label>
+          <label className="field">
             Confirm password
             <input
               name="confirmPassword"
@@ -135,11 +135,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
               minLength={12}
             />
           </label>
-          <label className="check-line">
+          <label className="check mb">
             <input name="ageConfirmed" type="checkbox" required />I confirm I am
             at least 18.
           </label>
-          <label className="check-line">
+          <label className="check mb">
             <input name="termsAccepted" type="checkbox" required />I accept the{" "}
             <Link href="/terms">terms</Link> and{" "}
             <Link href="/privacy">privacy notice</Link>.
@@ -147,16 +147,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </>
       )}
       {error && (
-        <p className="form-error" role="alert">
+        <p className="err-t" role="alert">
           {error}
         </p>
       )}
       {message && (
-        <p className="form-success" role="status">
+        <p className="ok-t" role="status">
           {message}
         </p>
       )}
-      <button className="orange-button" type="submit" disabled={pending}>
+      <button
+        className="btn btn-p btn-lg btn-block"
+        type="submit"
+        disabled={pending}
+      >
         {pending
           ? "Please wait…"
           : mode === "sign-up"

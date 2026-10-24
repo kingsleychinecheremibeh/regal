@@ -1,6 +1,6 @@
-# Regalvest 2.0 investor application
+# TurboXGlobal investor preview
 
-Next.js public site and protected dashboard, NestJS REST API, and PostgreSQL persistence. Account identity is real. Every financial value and action is an isolated simulation. See [DEMO_GUIDE.md](DEMO_GUIDE.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
+Next.js public site and protected dashboard, NestJS REST API, and PostgreSQL persistence. Account identity is real. Every financial value, price and verification decision is an isolated simulation. The project was rebuilt from Regalvest 2.0 using the TurboXGlobal reference designs; internal package, service and cookie names still say `regalvest`. See [DEMO_GUIDE.md](DEMO_GUIDE.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Requirements
 
@@ -60,7 +60,7 @@ Schema changes use `pnpm.cmd db:generate` followed by review of the SQL migratio
 
 ## Deployment
 
-The expanded account and dashboard build is live at [regalvest-web.onrender.com](https://regalvest-web.onrender.com), backed by [regalvest-api.onrender.com](https://regalvest-api.onrender.com). The private account sign-in, authenticated profile, protected dashboard, and logout were verified through the public web URL on October 14, 2026. Public signup and email recovery still need Resend. All financial actions remain simulations; see [docs/investor-evidence.md](docs/investor-evidence.md) for completed checks and limitations.
+**The TurboXGlobal rebuild is not deployed yet.** It needs migration `0003_turboxglobal` applied to the production database first, which is additive. The previous Regalvest build is live at [regalvest-web.onrender.com](https://regalvest-web.onrender.com), backed by [regalvest-api.onrender.com](https://regalvest-api.onrender.com). The private account sign-in, authenticated profile, protected dashboard, and logout were verified through the public web URL on October 14, 2026. Public signup and email recovery still need Resend. All financial actions remain simulations; see [docs/investor-evidence.md](docs/investor-evidence.md) for completed checks and limitations.
 
 The intended low-cost setup is Neon PostgreSQL plus Render API and web services. Vercel may host the Next.js frontend on a plan whose terms permit this investor-facing use. Use the same-origin `/api/v1` rewrite for auth cookies.
 
