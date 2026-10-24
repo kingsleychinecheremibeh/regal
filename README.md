@@ -60,6 +60,8 @@ Schema changes use `pnpm.cmd db:generate` followed by review of the SQL migratio
 
 ## Deployment
 
+The website is deployed to cPanel (Node.js app); see [docs/CPANEL.md](docs/CPANEL.md). The API stays on Render and the database on Neon. The Render web-service steps below are kept for reference.
+
 **The TurboXGlobal rebuild is not deployed yet.** It needs migration `0003_turboxglobal` applied to the production database first, which is additive. The previous Regalvest build is live at [regalvest-web.onrender.com](https://regalvest-web.onrender.com), backed by [regalvest-api.onrender.com](https://regalvest-api.onrender.com). The private account sign-in, authenticated profile, protected dashboard, and logout were verified through the public web URL on October 14, 2026. Public signup and email recovery still need Resend. All financial actions remain simulations; see [docs/investor-evidence.md](docs/investor-evidence.md) for completed checks and limitations.
 
 The intended low-cost setup is Neon PostgreSQL plus Render API and web services. Vercel may host the Next.js frontend on a plan whose terms permit this investor-facing use. Use the same-origin `/api/v1` rewrite for auth cookies.

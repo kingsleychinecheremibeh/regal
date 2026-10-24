@@ -18,9 +18,12 @@ Completed checks:
 - The generated migration was reviewed. It only creates tables, adds nullable or defaulted columns, and adds indexes and foreign keys.
 - Pure helper checks passed: decimal parsing to 1e-8 units, rejection of invalid amounts, fixed-price conversion and chart series.
 
+- All 8 integration tests passed against the isolated Neon `regalvest_test_codex` database, which the suite migrated to `0003`. They cover gating, KYC review and funding, idempotent trades, concurrent duplicate payments, over-limit failure, cross-user isolation, card decline, statements, KYB gating and reset. The suite was re-run and passed again after the dependency upgrades.
+- Production dependency audit: two critical Next.js remote-code-execution advisories and four high-severity advisories were fixed. Next went to 16.4.3, drizzle-orm to 0.45.4, and pnpm overrides patch body-parser, multer and js-yaml. `pnpm audit --prod` now reports no known vulnerabilities.
+- The cPanel package (`package:cpanel`) was extracted into a clean folder and started with `node app/server.js`. Public pages returned 200, the dashboard redirected to sign-in, CSS loaded, an unknown path returned 404, and `/api/v1/health` was proxied to the live Render API.
+
 Not yet done:
 
-- **Integration tests:** they were rewritten for the new flows (gating, KYC review and funding, idempotent trades, concurrent duplicate payments, over-limit failure, cross-user isolation, card decline, statements, KYB gating and reset). They have not been run, because no isolated test database was available in this session.
 - **Browser walkthrough:** not done.
 - **Production:** the migration has not been applied and the build has not been deployed.
 

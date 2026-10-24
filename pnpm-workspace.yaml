@@ -1,2 +1,8 @@
 packages:
   - apps/*
+
+# Patched transitive versions for production advisories (October 2026).
+overrides:
+  body-parser@>=2.0.0 <2.4.0: ^2.4.0
+  multer@>=2.0.0 <2.5.0: ^2.5.0
+  js-yaml@>=5.0.0 <5.4.1: ^5.5.0

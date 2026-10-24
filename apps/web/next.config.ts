@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
+  // Self-contained server for cPanel's Node.js App (see docs/CPANEL.md).
+  output: "standalone",
+  outputFileTracingRoot: path.join(__dirname, "../.."),
+  // No next/image use; also keeps the platform-specific sharp binary out.
+  images: { unoptimized: true },
   async rewrites() {
     const target = (
       process.env.API_PROXY_TARGET ||
