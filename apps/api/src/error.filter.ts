@@ -24,6 +24,10 @@ export class ApiErrorFilter implements ExceptionFilter {
         event: "http_server_error",
         path: request.path,
         exception: exception instanceof Error ? exception.name : "UnknownError",
+        detail:
+          exception instanceof Error
+            ? String(exception.cause ?? exception.message).slice(0, 300)
+            : undefined,
       });
     }
     const error = String(HttpStatus[statusCode] ?? "Error")
