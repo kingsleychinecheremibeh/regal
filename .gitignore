@@ -2,6 +2,7 @@ node_modules/
 .pnpm-store/
 .next/
 dist/
+dist-cpanel/
 coverage/
 .env
 .env.local

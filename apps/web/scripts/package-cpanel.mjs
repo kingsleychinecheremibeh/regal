@@ -80,13 +80,15 @@ for (const entry of fs.readdirSync(store)) {
   }
 }
 
-// 3. Zip it for upload through cPanel's File Manager.
+// 3. Zip it for upload through cPanel's File Manager. Windows' own tar writes
+// forward-slash paths; Compress-Archive writes backslashes, which Linux
+// extracts as literal file names.
 if (process.platform === "win32")
-  execFileSync("powershell.exe", [
-    "-NoProfile",
-    "-Command",
-    `Compress-Archive -Path '${out}\\*' -DestinationPath '${zip}' -Force`,
-  ]);
+  execFileSync(
+    path.join(process.env.SystemRoot, "System32", "tar.exe"),
+    ["-a", "-cf", zip, "app", "node_modules"],
+    { cwd: out },
+  );
 else execFileSync("zip", ["-qr", zip, "."], { cwd: out });
 
 console.log(`Packaged ${seen.size} packages into ${path.relative(web, out)}`);

@@ -1,91 +1,142 @@
-# Deploying the website on cPanel
+# Deploying on cPanel
 
-The site (`apps/web`) runs on cPanel as a Node.js app. The API stays on Render and the database stays on Neon. Visitors only ever see the cPanel domain: the site forwards `/api/v1/*` to the API, so login cookies stay on your domain.
+Both the website (`apps/web`) and the API (`apps/api`) run on cPanel as two Node.js apps. The database stays on Neon. Visitors only ever see the main domain: the website forwards `/api/v1/*` to the API subdomain, so login cookies stay on the main domain.
 
+```text
+browser ──https──▶ turboxglobal.com (Next.js) ──/api/v1──▶ api.turboxglobal.com (NestJS) ──wss:443──▶ Neon
 ```
-browser ──https──▶ cPanel (Next.js) ──/api/v1──▶ Render (API) ──▶ Neon (PostgreSQL)
-```
+
+This guide matches the Namecheap shared hosting account `turbudce` (CloudLinux 8, SSH on port 21098). Notes for other hosts are at the end.
 
 ## Requirements
 
-- cPanel with **Setup Node.js App** offering **Node.js 20.9 or newer**.
-- HTTPS on the domain (AutoSSL is enough). Login cookies are `Secure` in production and will not work over plain HTTP.
+- **Node.js 22 or newer** in _Setup Node.js App_. The API's Neon driver uses Node's built-in WebSocket.
+- HTTPS on both the domain and the API subdomain (AutoSSL is enough). Login cookies are `Secure` in production and will not work over plain HTTP.
+- SSH access (cPanel → _Manage Shell_ → enable) with a key authorised under _SSH Access_. The examples use this `~/.ssh/config` entry:
 
-## 1. Build the upload package (on your computer)
+  ```text
+  Host turboxglobal
+    HostName turboxglobal.com
+    Port 21098
+    User turbudce
+    IdentityFile ~/.ssh/turboxglobal_cpanel
+  ```
+
+Namecheap blocks outbound port 5432, so the API reaches Neon through Neon's WebSocket proxy on port 443 (`DATABASE_DRIVER=neon-websocket`).
+
+## 1. Build the upload packages (on your computer)
 
 From the repository root, in PowerShell:
 
 ```powershell
-$env:API_PROXY_TARGET = "https://regalvest-api.onrender.com"
+# API
+pnpm.cmd --filter @regalvest/api build
+pnpm.cmd --filter @regalvest/api package:cpanel
+
+# Website (API_PROXY_TARGET is fixed into the build; rebuild if it changes)
+$env:API_PROXY_TARGET = "https://api.turboxglobal.com"
 pnpm.cmd --filter @regalvest/web build
 pnpm.cmd --filter @regalvest/web package:cpanel
 ```
 
-This creates `apps/web/dist/cpanel/turboxglobal-web.zip`, about 5 MB. `API_PROXY_TARGET` is fixed into the build, so rebuild if the API address changes.
+| Zip                                         | Contents                                               |
+| ------------------------------------------- | ------------------------------------------------------ |
+| `apps/api/dist-cpanel/turboxglobal-api.zip` | `app/` (startup file `dist/main.js`) + `node_modules/` |
+| `apps/web/dist/cpanel/turboxglobal-web.zip` | `app/` (startup file `server.js`) + `node_modules/`    |
 
-The zip contains:
+In both, `node_modules/` sits one level **above** `app/` on purpose: cPanel's Node.js selector does not allow a `node_modules` folder inside the application root.
 
-- `app/`: the application. `server.js` is the startup file.
-- `node_modules/`: dependencies, kept one level **above** the app on purpose. cPanel's Node.js selector does not allow a `node_modules` folder inside the application root.
+## 2. Upload and prepare (over SSH)
 
-## 2. Upload
+```sh
+scp apps/api/dist-cpanel/turboxglobal-api.zip apps/web/dist/cpanel/turboxglobal-web.zip turboxglobal:~/
+ssh turboxglobal
+```
 
-1. In cPanel **File Manager**, create a folder in your home directory, outside `public_html`, for example `turboxglobal-web`.
-2. Upload the zip into it and **Extract**. You should now have:
-   - `~/turboxglobal-web/app/server.js`
-   - `~/turboxglobal-web/node_modules/next`
+On the server:
 
-## 3. Create the Node.js app
+```sh
+export PATH=/opt/alt/alt-nodejs22/root/usr/bin:$PATH
+for app in api web; do
+  mkdir -p ~/turboxglobal-$app && cd ~/turboxglobal-$app
+  unzip -qo ~/turboxglobal-$app.zip && rm ~/turboxglobal-$app.zip
+  # Zips made on Windows extract world-writable; tighten them.
+  find . -type d -exec chmod 755 {} + && find . -type f -exec chmod 644 {} +
+done
 
-Open **Setup Node.js App** and select **Create Application**:
+# argon2's prebuilt binary needs glibc 2.34; CloudLinux 8 has 2.28. Compile it
+# here (system Python 3.6 is too old for node-gyp, so use the alt Python).
+cd ~/turboxglobal-api/node_modules/argon2
+npx --yes node-gyp@11 rebuild --python=/opt/alt/python313/bin/python3.13
+cd ~/turboxglobal-api/app && node -e 'require("argon2").hash("x").then(() => console.log("argon2 ok"))'
+```
 
-| Field                    | Value                      |
-| ------------------------ | -------------------------- |
-| Node.js version          | 20.x or newer              |
-| Application mode         | Production                 |
-| Application root         | `turboxglobal-web/app`     |
-| Application URL          | your domain (or subdomain) |
-| Application startup file | `server.js`                |
+Re-run the argon2 step whenever a new API zip is extracted.
 
-Add these environment variables:
+## 3. Create the API subdomain
 
-| Name               | Value                                |
-| ------------------ | ------------------------------------ |
-| `NODE_ENV`         | `production`                         |
-| `API_PROXY_TARGET` | `https://regalvest-api.onrender.com` |
-| `HOSTNAME`         | `127.0.0.1`                          |
+In cPanel **Domains**, create `api.turboxglobal.com` (any document root; it is not used). Then cPanel → **SSL/TLS Status** → _Run AutoSSL_ and wait until the subdomain shows a valid certificate.
 
-Then click **Create** and **Restart**.
+## 4. Create the two Node.js apps
 
-- **Do not** click _Run NPM Install_; the dependencies are already included.
-- `HOSTNAME` matters: Next.js listens on whatever `HOSTNAME` says, and on many servers it is set to the machine name by default.
+In **Setup Node.js App** → **Create Application**, once for each:
 
-## 4. Point the API at the new domain
+| Field                    | API                    | Website                |
+| ------------------------ | ---------------------- | ---------------------- |
+| Node.js version          | 22 (or newer)          | 22 (or newer)          |
+| Application mode         | Production             | Production             |
+| Application root         | `turboxglobal-api/app` | `turboxglobal-web/app` |
+| Application URL          | `api.turboxglobal.com` | `turboxglobal.com`     |
+| Application startup file | `dist/main.js`         | `server.js`            |
 
-In the Render dashboard, open the **API** service → _Environment_ and set:
+API environment variables:
 
-- `CORS_ORIGINS`: `https://your-domain` (comma-separate it from any existing origins you still use)
-- `PUBLIC_WEB_URL`: `https://your-domain`
+| Name               | Value                                      |
+| ------------------ | ------------------------------------------ |
+| `NODE_ENV`         | `production`                               |
+| `DATABASE_URL`     | your Neon connection string (keep private) |
+| `DATABASE_DRIVER`  | `neon-websocket`                           |
+| `CORS_ORIGINS`     | `https://turboxglobal.com`                 |
+| `PUBLIC_WEB_URL`   | `https://turboxglobal.com`                 |
+| `TRUST_PROXY_HOPS` | `1`                                        |
+| `DEMO_MODE`        | `true`                                     |
+| `RESEND_API_KEY`   | only if you use email (optional)           |
+| `EMAIL_FROM`       | only if you use email (optional)           |
 
-Save. Render redeploys the API.
+Website environment variables:
 
-The API rejects sign-ins and every other state-changing request from any origin not listed in `CORS_ORIGINS`.
+| Name               | Value                          |
+| ------------------ | ------------------------------ |
+| `NODE_ENV`         | `production`                   |
+| `API_PROXY_TARGET` | `https://api.turboxglobal.com` |
+| `HOSTNAME`         | `127.0.0.1`                    |
+
+Click **Create**, then **Restart**, for each. **Do not** click _Run NPM Install_; the dependencies are already included.
+
+`HOSTNAME` matters: Next.js listens on whatever `HOSTNAME` says, and on many servers it is set to the machine name by default.
 
 ## 5. Check
 
-- `https://your-domain/` loads with styling.
-- `https://your-domain/api/v1/health` returns `{"status":"ok",...}`. The first request can take up to a minute while Render Free wakes up.
+- `https://api.turboxglobal.com/api/v1/health` returns `{"status":"ok",...}`.
+- `https://turboxglobal.com/` loads with styling.
+- `https://turboxglobal.com/api/v1/health` returns the same health response (website → API).
 - Sign in, reload the dashboard, and sign out.
 
 ## Updating later
 
-Rebuild and repackage, upload the new zip, extract over the old folder, then **Restart** the app in _Setup Node.js App_.
+Rebuild and repackage, upload the new zip, repeat step 2 for that app (including the argon2 build for the API), then **Restart** the app in _Setup Node.js App_.
 
 ## Troubleshooting
 
-| Symptom                                                      | Likely cause                                                                                                                                                             |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 503 or "Incomplete response"                                 | The app failed to start. Open the app's `stderr.log` in the application root. Check the Node version (20.9+) and that `node_modules` sits next to `app/`, not inside it. |
-| Pages load but sign-in fails with "Invalid request origin"   | `CORS_ORIGINS` on Render does not exactly match `https://your-domain`.                                                                                                   |
-| Sign-in succeeds but the dashboard sends you back to sign-in | The site is served over HTTP, so the browser drops the `Secure` cookie. Enable HTTPS.                                                                                    |
-| `/api/v1/health` times out                                   | The Render API is asleep or down. Retry after a minute.                                                                                                                  |
+| Symptom                                                      | Likely cause                                                                                                                                  |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 503 or "Incomplete response"                                 | The app failed to start. Open `stderr.log` in the application root. Check the Node version (22+) and that `node_modules` sits next to `app/`. |
+| API `stderr.log` says `Invalid environment: …`               | The named variable is missing or wrong in the API's environment variables. `PUBLIC_WEB_URL` must start with `https://`.                       |
+| API `stderr.log` mentions `GLIBC_2.34` / `argon2`            | The argon2 compile step in section 2 was skipped after a new upload.                                                                          |
+| API health returns 503                                       | The database is unreachable. Check `DATABASE_URL` and that `DATABASE_DRIVER` is `neon-websocket`.                                             |
+| Pages load but sign-in fails with "Invalid request origin"   | API `CORS_ORIGINS` does not exactly match `https://turboxglobal.com`.                                                                         |
+| Sign-in succeeds but the dashboard sends you back to sign-in | The site is served over HTTP, so the browser drops the `Secure` cookie. Enable HTTPS.                                                         |
+
+## Other hosts
+
+If the host allows outbound port 5432, leave `DATABASE_DRIVER` unset to use the standard PostgreSQL driver. If its glibc is 2.34 or newer (`ldd --version`), argon2's prebuilt binary works and the compile step can be skipped.

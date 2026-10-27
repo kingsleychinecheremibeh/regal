@@ -12,9 +12,11 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "account:provision": "tsx scripts/account.ts provision",
-    "account:reset": "tsx scripts/account.ts reset"
+    "account:reset": "tsx scripts/account.ts reset",
+    "package:cpanel": "node scripts/package-cpanel.mjs"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
     "@nestjs/common": "^11.2.8",
     "@nestjs/core": "^11.2.8",
     "@nestjs/platform-express": "^11.2.8",

@@ -14,6 +14,7 @@ const configSchema = z
           value.startsWith("postgres://") || value.startsWith("postgresql://"),
         "Must be a PostgreSQL URL",
       ),
+    DATABASE_DRIVER: z.enum(["postgres", "neon-websocket"]).default("postgres"),
     CORS_ORIGINS: z
       .string()
       .min(1)
