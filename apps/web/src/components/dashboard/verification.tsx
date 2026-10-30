@@ -4,7 +4,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { dateTime } from "@/lib/format";
 import { CaseStatus, useAction, useData } from "./context";
-import { Badge, Field, Skeleton } from "./ui";
+import { Badge, CountrySelect, Field, Skeleton } from "./ui";
 
 type Case = {
   kind: "kyc" | "kyb";
@@ -137,10 +137,10 @@ function KycForm({
           </select>
         </Field>
         <Field label="Issuing country" id="k-country">
-          <input
+          <CountrySelect
             id="k-country"
             value={doc.country}
-            onChange={(e) => setDoc({ ...doc, country: e.target.value })}
+            onChange={(country) => setDoc({ ...doc, country })}
           />
         </Field>
         <Field
@@ -292,7 +292,13 @@ function KybForm({
       <>
         {text("name", "Registered company name")}
         {text("registrationNumber", "Registration number")}
-        {text("country", "Country of incorporation")}
+        <Field label="Country of incorporation" id="b-country">
+          <CountrySelect
+            id="b-country"
+            value={company.country}
+            onChange={(country) => setCompany({ ...company, country })}
+          />
+        </Field>
         {text("incorporatedOn", "Date of incorporation", "date")}
         {text("address", "Registered address")}
         <button

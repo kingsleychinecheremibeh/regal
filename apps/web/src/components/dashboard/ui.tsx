@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef } from "react";
+import { COUNTRIES } from "@/lib/countries";
 import { label } from "@/lib/format";
 import { useDash } from "./context";
 
@@ -363,4 +364,28 @@ export function Field({
 export function useMask() {
   const { hide } = useDash();
   return (value: string) => (hide ? "••••••" : value);
+}
+
+export function CountrySelect({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const saved = value && !COUNTRIES.includes(value) ? [value] : [];
+  return (
+    <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+      <option value="" disabled>
+        Select a country
+      </option>
+      {[...saved, ...COUNTRIES].map((c) => (
+        <option key={c} value={c}>
+          {c}
+        </option>
+      ))}
+    </select>
+  );
 }

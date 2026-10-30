@@ -31,7 +31,7 @@ const modes = {
   },
   verify: {
     title: "Verify your email",
-    note: "Complete verification before signing in.",
+    note: "Confirm your email address to activate your account.",
   },
   "resend-verification": {
     title: "Request a new verification link",
@@ -65,10 +65,12 @@ export default async function InformationPage({ params }: Params) {
         <div className="auth-box">
           <Logo />
           <div className="card pad" style={{ padding: 28 }}>
-            <h2>{modes[mode].title}</h2>
-            <p className="mut">{modes[mode].note}</p>
             <Suspense fallback={<p className="mut">Loading form…</p>}>
-              <AuthForm mode={mode} />
+              <AuthForm
+                mode={mode}
+                title={modes[mode].title}
+                note={modes[mode].note}
+              />
             </Suspense>
           </div>
         </div>

@@ -118,8 +118,25 @@ export function Overview() {
   return (
     <>
       <PageHead
-        title="Overview"
-        sub="Your money, tasks and access at a glance."
+        title={`Welcome, ${state.user.fullName.split(" ")[0]}`}
+        sub={
+          verified
+            ? "Your account is fully verified. Here is where everything stands today."
+            : kyc === "in_review"
+              ? "Your verification is in review. Full access to the platform unlocks as soon as it is approved."
+              : "Verify your account to unlock full access and take complete control of trading, payments, accounts and cards."
+        }
+        action={
+          !verified &&
+          kyc !== "in_review" && (
+            <Link
+              className="btn btn-p"
+              href="/dashboard/settings?tab=Verification"
+            >
+              Verify account
+            </Link>
+          )
+        }
       />
       <div className="grid g4 mb">
         <Kpi

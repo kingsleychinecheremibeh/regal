@@ -20,12 +20,35 @@ const endpoints: Record<Mode, string> = {
   "resend-verification": "resend-verification",
 };
 
-export function AuthForm({ mode }: { mode: Mode }) {
+const notices: Record<string, string> = {
+  verified: "Email verified. Sign in to continue.",
+  reset: "Password updated. Sign in with your new password.",
+};
+
+const links: [Mode, string, string][] = [
+  ["sign-in", "/sign-in", "Sign in"],
+  ["sign-up", "/sign-up", "Create account"],
+  ["forgot-password", "/forgot-password", "Forgot password?"],
+  ["resend-verification", "/resend-verification", "Resend verification"],
+];
+
+export function AuthForm({
+  mode,
+  title,
+  note,
+}: {
+  mode: Mode;
+  title: string;
+  note: string;
+}) {
   const router = useRouter();
   const search = useSearchParams();
   const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(
+    mode === "sign-in" ? (notices[search.get("notice") ?? ""] ?? "") : "",
+  );
   const [error, setError] = useState("");
+  const [registered, setRegistered] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,10 +95,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
           destination?.startsWith("/dashboard") ? destination : "/dashboard",
         );
         router.refresh();
+      } else if (mode === "verify" || mode === "reset-password") {
+        window.history.replaceState(null, "", window.location.pathname);
+        router.replace(
+          `/sign-in?notice=${mode === "verify" ? "verified" : "reset"}`,
+        );
+      } else if (mode === "sign-up") {
+        setRegistered(String(data.email));
       } else {
         setMessage(result.message ?? "Done");
-        if (mode === "verify" || mode === "reset-password")
-          window.history.replaceState(null, "", window.location.pathname);
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Please try again");
@@ -84,8 +112,30 @@ export function AuthForm({ mode }: { mode: Mode }) {
     }
   }
 
+  if (registered)
+    return (
+      <div role="status">
+        <h2>Check your email</h2>
+        <p className="mut">
+          We sent a verification link to <b>{registered}</b>. Open it to
+          activate your account, then sign in.
+        </p>
+        <p className="mut">
+          Can&apos;t find it? Check your spam folder or request a new link.
+        </p>
+        <Link className="btn btn-p btn-lg btn-block" href="/sign-in">
+          Go to sign in
+        </Link>
+        <div className="auth-links">
+          <Link href="/resend-verification">Resend verification</Link>
+        </div>
+      </div>
+    );
+
   return (
     <form onSubmit={submit}>
+      <h2>{title}</h2>
+      <p className="mut">{note}</p>
       {mode === "sign-up" && (
         <label className="field">
           Full name
@@ -136,13 +186,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
             />
           </label>
           <label className="check mb">
-            <input name="ageConfirmed" type="checkbox" required />I confirm I am
-            at least 18.
+            <input name="ageConfirmed" type="checkbox" required />
+            <span>I confirm I am at least 18.</span>
           </label>
           <label className="check mb">
-            <input name="termsAccepted" type="checkbox" required />I accept the{" "}
-            <Link href="/terms">terms</Link> and{" "}
-            <Link href="/privacy">privacy notice</Link>.
+            <input name="termsAccepted" type="checkbox" required />
+            <span>
+              I accept the <Link href="/terms">terms</Link> and{" "}
+              <Link href="/privacy">privacy notice</Link>.
+            </span>
           </label>
         </>
       )}
@@ -176,10 +228,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
                     : "Reset password"}
       </button>
       <div className="auth-links">
-        <Link href="/sign-in">Sign in</Link>
-        <Link href="/sign-up">Create account</Link>
-        <Link href="/forgot-password">Forgot password?</Link>
-        <Link href="/resend-verification">Resend verification</Link>
+        {links
+          .filter(([m]) => m !== mode)
+          .map(([m, href, text]) => (
+            <Link key={m} href={href}>
+              {text}
+            </Link>
+          ))}
       </div>
     </form>
   );

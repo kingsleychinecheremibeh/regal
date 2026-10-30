@@ -28,10 +28,6 @@ export default function RootLayout({
         <a className="skip" href="#main">
           Skip to content
         </a>
-        <div className="demo-strip" role="note">
-          <b>Investor preview.</b> Accounts are real. All money, prices and
-          verification are simulated.
-        </div>
         {children}
       </body>
     </html>

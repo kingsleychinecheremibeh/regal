@@ -6,7 +6,16 @@ import { FIAT, money } from "@/lib/format";
 import type { Tx } from "@/lib/types";
 import { useAction, useDash, useData } from "./context";
 import { TxTable } from "./tx";
-import { Empty, Field, Gate, Modal, PageHead, Seg, Skeleton } from "./ui";
+import {
+  CountrySelect,
+  Empty,
+  Field,
+  Gate,
+  Modal,
+  PageHead,
+  Seg,
+  Skeleton,
+} from "./ui";
 
 type Beneficiary = {
   id: string;
@@ -75,10 +84,10 @@ function AddBeneficiary({
       <div className="row" style={{ alignItems: "flex-start" }}>
         <div className="grow">
           <Field label="Country" id="b-country">
-            <input
+            <CountrySelect
               id="b-country"
               value={form.country}
-              onChange={(e) => setForm({ ...form, country: e.target.value })}
+              onChange={(country) => setForm({ ...form, country })}
             />
           </Field>
         </div>
