@@ -671,6 +671,23 @@ th button {
   gap: 10px;
   margin-top: 10px;
 }
+@media (min-width: 961px) {
+  .site .wrap {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    max-width: none;
+    padding: 0 32px;
+  }
+  .site .logo {
+    justify-self: start;
+  }
+  .site .nav {
+    gap: 10px;
+  }
+  .acts {
+    justify-self: end;
+  }
+}
 @media (max-width: 960px) {
   .nav {
     display: none;
