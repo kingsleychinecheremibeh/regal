@@ -627,6 +627,33 @@ th button {
 .mega a:hover {
   background: var(--soft);
 }
+.nav-item.compact {
+  position: relative;
+}
+.drop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 200px;
+  padding: 10px;
+  background: var(--surf);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 24px 40px rgba(11, 21, 51, 0.18);
+}
+.drop a {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 15px;
+}
+.drop a:hover {
+  background: var(--soft);
+}
 .burger {
   all: unset;
   display: none;
@@ -670,7 +697,8 @@ th button {
   .nav.open .macts {
     display: flex;
   }
-  .mega {
+  .mega,
+  .drop {
     position: static;
     box-shadow: none;
     border-radius: 10px;

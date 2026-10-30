@@ -631,11 +631,11 @@ export const nav: [string, [string, [string, string][]][]][] = [
       [
         "Company",
         [
-          ["about", "About"],
-          ["blog", "Blog"],
-          ["faq", "FAQ"],
+          ["about", "About Us"],
           ["careers", "Careers"],
+          ["blog", "Blog"],
           ["contact", "Contact Us"],
+          ["faq", "FAQ"],
           ["help", "Help & Support"],
         ],
       ],

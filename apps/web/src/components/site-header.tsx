@@ -49,14 +49,26 @@ export function SiteHeader() {
           }}
         >
           {nav.map(([name, groups]) => (
-            <div className="nav-item" key={name}>
+            <div
+              className={`nav-item ${groups.length === 1 ? "compact" : ""}`}
+              key={name}
+            >
               <button
                 onClick={() => setMenu(menu === name ? null : name)}
                 aria-expanded={menu === name}
               >
                 {name} ▾
               </button>
-              {menu === name && (
+              {menu === name && groups.length === 1 && (
+                <div className="drop">
+                  {groups[0][1].map(([slug, label]) => (
+                    <Link key={slug} href={`/${slug}`}>
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+              {menu === name && groups.length > 1 && (
                 <div className="mega">
                   <div className="mega-in">
                     {groups.map(([group, items]) => (
