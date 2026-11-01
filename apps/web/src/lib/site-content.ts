@@ -474,62 +474,114 @@ export const pages: Record<string, SitePage> = {
   terms: {
     title: "Terms of use",
     icon: "book",
-    lead: "The terms that apply when you use this TurboXGlobal investor preview.",
+    lead: "Last updated 1 November 2026. These terms apply when you use TurboXGlobal.",
     features: [],
     steps: [],
     legal: [
       [
-        "A product demonstration",
-        "This site demonstrates the TurboXGlobal product. It is not a live financial service. You must be at least 18 to create an account.",
+        "1. About these terms",
+        "These terms are an agreement between you and TurboXGlobal. By creating an account or using the site you accept them. If you do not agree, do not use the service.",
       ],
       [
-        "Simulated money",
-        "Balances, prices, trades, payments, cards, accounts, investments and rewards are simulated. They have no monetary value and cannot be withdrawn, redeemed or transferred outside this site.",
+        "2. Pre-launch status",
+        "TurboXGlobal is in pre-launch. Accounts and sign-in are real, but balances, prices, trades, payments, cards, accounts, investments and rewards are simulated, have no monetary value and cannot be withdrawn, redeemed or transferred. We do not currently hold customer funds or offer regulated payment, banking, brokerage or custody services.",
       ],
       [
-        "Simulated verification",
-        "Identity and business verification in the preview is a demonstration. Do not upload real identity or company documents. Files you choose stay in your browser; only the file name, type and size are recorded.",
+        "3. Eligibility",
+        "You must be at least 18 years old and able to enter a binding agreement. You must give accurate information and keep it up to date.",
       ],
       [
-        "No advice",
-        "Nothing on this site is investment, legal or tax advice. Illustrative prices are not market quotes.",
+        "4. Your account",
+        "Keep your password private and tell us at once if you think someone else has used your account. You are responsible for activity on your account. One person may hold one personal account.",
       ],
       [
-        "Your account",
-        "Keep your password private. We may suspend accounts that misuse the preview.",
+        "5. Verification",
+        "We may ask you to verify your identity or business. During pre-launch, do not upload real identity or company documents; the screens record only the file name, type and size. We may refuse, suspend or close an account where verification is incomplete or information appears false.",
       ],
       [
-        "Changes",
-        "Features may change during development. No financial product is promised by this preview.",
+        "6. Acceptable use",
+        "You must not break the law, attempt to access other accounts or our systems, interfere with the service, scrape it at scale, or use it to deceive anyone, including by presenting simulated balances or transactions as real.",
+      ],
+      [
+        "7. No advice",
+        "Nothing on TurboXGlobal is investment, financial, legal or tax advice. Prices shown are illustrative and are not market quotes.",
+      ],
+      [
+        "8. Intellectual property",
+        "The site, its design, software and content belong to TurboXGlobal or its licensors. You may use them only to access the service for yourself.",
+      ],
+      [
+        "9. Availability and changes",
+        "The service is provided as is and may change, pause or stop while it is being developed. We may update these terms; the date above shows the latest version, and continuing to use the service means you accept the update.",
+      ],
+      [
+        "10. Liability",
+        "To the extent the law allows, TurboXGlobal is not liable for indirect or consequential loss, or for any decision you make based on simulated information. Nothing in these terms limits liability that cannot be limited by law.",
+      ],
+      [
+        "11. Suspension and closure",
+        "You can stop using the service at any time and ask us to delete your account. We may suspend or close accounts that breach these terms.",
+      ],
+      [
+        "12. Contact",
+        "Questions about these terms can be sent through our Contact page.",
       ],
     ],
   },
   privacy: {
-    title: "Privacy notice",
+    title: "Privacy policy",
     icon: "shield",
-    lead: "What this investor preview stores and why.",
+    lead: "Last updated 1 November 2026. How TurboXGlobal collects, uses and protects your personal data.",
     features: [],
     steps: [],
     legal: [
       [
-        "What we store",
-        "Your name, email address, password hash, acceptance of the terms, session records, preferences, and your simulated activity (balances, transactions, cards, beneficiaries you type in, verification answers and support messages). Waitlist and contact form submissions are stored separately.",
+        "1. Who we are",
+        "TurboXGlobal operates this website and is responsible for the personal data described here. You can reach us through our Contact page.",
       ],
       [
-        "What we do not store",
-        "Real payment, bank or card credentials. Identity or company document files: the verification screens record only the file name, type and size. Identity document numbers are stored masked.",
+        "2. Data we collect",
+        "Account details (name, email address, password stored only as an Argon2id hash, confirmation of age and acceptance of terms); security records (sign-in sessions, IP address and browser details used to protect your account); verification answers you enter (identity document numbers are stored masked; document files are not uploaded, only their name, type and size); your activity in the product, preferences and support requests; and waitlist or contact form submissions.",
       ],
       [
-        "Why",
-        "To sign you in, keep your demo consistent between visits and reply to messages you send.",
+        "3. How we use it",
+        "To create and secure your account, send verification and password emails, provide and improve the service, respond to your messages, prevent fraud and abuse, and meet legal obligations. We do not sell your personal data and do not use it for third-party advertising.",
       ],
       [
-        "Security",
-        "Passwords are hashed with Argon2id. Sessions use HttpOnly cookies. Verification and reset tokens are stored only as hashes and expire.",
+        "4. Legal bases",
+        "Where data protection law requires a legal basis, we rely on performing our contract with you, our legitimate interest in running and securing the service, your consent where we ask for it, and compliance with legal obligations.",
       ],
       [
-        "Your choices",
-        "You can reset your simulated data from Settings at any time. Please avoid entering sensitive personal or financial information into demo fields.",
+        "5. Who we share it with",
+        "Service providers that run the platform for us: our web hosting provider, our database hosting provider, and our transactional email provider (Resend), which sends verification and reset emails. They process data only on our instructions. We may disclose data if the law requires it or to protect our users and the service.",
+      ],
+      [
+        "6. International transfers",
+        "Our providers may process data outside your country. Where required, we rely on appropriate safeguards such as standard contractual clauses.",
+      ],
+      [
+        "7. Cookies",
+        "We use one essential cookie to keep you signed in. It is HttpOnly and expires after seven days or when you sign out. We do not use advertising or tracking cookies.",
+      ],
+      [
+        "8. How long we keep it",
+        "Account data is kept while your account is open and deleted within 30 days after you ask us to close it, unless the law requires longer. Expired sign-in sessions and one-time links are removed or invalidated automatically. Contact and waitlist submissions are kept for up to 24 months.",
+      ],
+      [
+        "9. Security",
+        "Passwords are hashed with Argon2id, sessions use secure HttpOnly cookies, verification and reset tokens are stored only as hashes and expire, and the site is served over HTTPS. No system is perfectly secure, so please use a unique password.",
+      ],
+      [
+        "10. Your rights",
+        "Depending on where you live, you may have the right to access, correct, delete or export your data, to object to or restrict its use, and to withdraw consent. California residents have the right to know, delete and correct their data and not to be discriminated against for using these rights; we do not sell or share personal information for cross-context advertising. To make a request, use our Contact page. You may also complain to your local data protection authority.",
+      ],
+      [
+        "11. Children",
+        "TurboXGlobal is not for anyone under 18, and we do not knowingly collect their data.",
+      ],
+      [
+        "12. Changes",
+        "We will update this policy as the service develops. The date above shows the latest version.",
       ],
     ],
   },

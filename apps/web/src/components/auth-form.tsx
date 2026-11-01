@@ -193,7 +193,7 @@ export function AuthForm({
             <input name="termsAccepted" type="checkbox" required />
             <span>
               I accept the <Link href="/terms">terms</Link> and{" "}
-              <Link href="/privacy">privacy notice</Link>.
+              <Link href="/privacy">privacy policy</Link>.
             </span>
           </label>
         </>

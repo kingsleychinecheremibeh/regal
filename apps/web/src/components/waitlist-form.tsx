@@ -88,7 +88,7 @@ export function WaitlistForm() {
         />
         <span className="mut">
           I agree to receive TurboXGlobal launch updates by email. See the{" "}
-          <Link href="/privacy">privacy notice</Link>.
+          <Link href="/privacy">privacy policy</Link>.
         </span>
       </label>
       <p className="err-t" role="alert">
