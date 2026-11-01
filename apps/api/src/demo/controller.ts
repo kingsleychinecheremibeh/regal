@@ -407,20 +407,6 @@ export class DemoController {
     return this.records.submit(req.userId, kind);
   }
 
-  @Post("verification/:kind/review")
-  @HttpCode(200)
-  @ApiOperation({
-    summary:
-      "Investor demo control: approve, request information or reject your own case",
-  })
-  review(
-    @Req() req: UserRequest,
-    @Param("kind") kind: string,
-    @Body() body: unknown,
-  ) {
-    return this.records.review(req.userId, kind, body);
-  }
-
   @Patch("profile") profile(@Req() req: UserRequest, @Body() body: unknown) {
     return this.records.updateProfile(req.userId, body);
   }

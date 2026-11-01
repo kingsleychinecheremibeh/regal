@@ -407,16 +407,31 @@ integration("Regalvest API with isolated PostgreSQL", () => {
     expect(
       (await call("POST", "demo/verification/kyc/submit", cookie)).status,
     ).toBe(200);
+    // Only admins decide cases; the customer cannot approve their own.
+    expect((await call("GET", "admin/verifications", cookie)).status).toBe(
+      403,
+    );
+    const [account] = await drizzle(sql)
+      .update(users)
+      .set({ isAdmin: true })
+      .where(eq(users.email, accountEmail))
+      .returning({ id: users.id });
+    const queue = await call("GET", "admin/verifications", cookie);
+    expect(queue.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ userId: account.id, kind: "kyc" }),
+      ]),
+    );
     expect(
       (
-        await call("POST", "demo/verification/kyc/review", cookie, {
+        await call("POST", `admin/verifications/${account.id}/kyc`, cookie, {
           decision: "rejected",
         })
       ).status,
     ).toBe(400);
     expect(
       (
-        await call("POST", "demo/verification/kyc/review", cookie, {
+        await call("POST", `admin/verifications/${account.id}/kyc`, cookie, {
           decision: "verified",
         })
       ).status,

@@ -34,7 +34,7 @@ const STATUS_NOTE: Record<CaseStatus, [string, string]> = {
   ],
   in_review: [
     "info",
-    "In review. Use the demo reviewer below to decide the case.",
+    "In review. Our team will check your details and notify you of the decision.",
   ],
   action_required: ["", "Action required. Update the steps and submit again."],
   rejected: [
@@ -477,7 +477,6 @@ function CaseFlow({ value }: { value: Case }) {
     steps.find(([key]) => !(key in value.data))?.[0] ?? steps[0][0];
   const [open, setOpen] = useState<string>(firstOpen);
   const [error, setError] = useState("");
-  const [note, setNote] = useState("");
   const { pending, run } = useAction();
   const label =
     value.kind === "kyc"
@@ -496,26 +495,6 @@ function CaseFlow({ value }: { value: Case }) {
       const next = steps.find(([key]) => key !== step && !(key in value.data));
       if (next) setOpen(next[0]);
     }
-  }
-
-  async function decide(decision: "verified" | "action_required" | "rejected") {
-    setError("");
-    await run(
-      () =>
-        api(`demo/verification/${value.kind}/review`, {
-          body: { decision, ...(note ? { note } : {}) },
-        }),
-      {
-        success:
-          decision === "verified"
-            ? value.kind === "kyc"
-              ? "Approved. Demo funds have been credited."
-              : "Business approved. Fiat Acquiring is unlocked."
-            : "Decision recorded.",
-        onError: setError,
-      },
-    );
-    setNote("");
   }
 
   return (
@@ -623,53 +602,6 @@ function CaseFlow({ value }: { value: Case }) {
           </button>
         )}
       </div>
-      {value.status === "in_review" && (
-        <div className="card pad demo-ctl mt">
-          <div className="row sp">
-            <b>Demo reviewer</b>
-            <span className="badge b-gold">Investor demo control</span>
-          </div>
-          <p className="sm mut">
-            In production a compliance analyst or a verification provider makes
-            this decision. Here you can play the reviewer to show each outcome.
-          </p>
-          <Field
-            label="Note to the customer (needed to request info or reject)"
-            id={`note-${value.kind}`}
-          >
-            <input
-              id={`note-${value.kind}`}
-              value={note}
-              maxLength={300}
-              placeholder="The ID image was unreadable. Upload a clear photo."
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </Field>
-          <div className="row">
-            <button
-              className="btn btn-p"
-              disabled={pending}
-              onClick={() => decide("verified")}
-            >
-              Approve
-            </button>
-            <button
-              className="btn btn-s"
-              disabled={pending}
-              onClick={() => decide("action_required")}
-            >
-              Request more info
-            </button>
-            <button
-              className="btn btn-x"
-              disabled={pending}
-              onClick={() => decide("rejected")}
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

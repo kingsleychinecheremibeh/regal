@@ -69,3 +69,17 @@ export async function provisionAccount(input: {
     await client.end();
   }
 }
+
+export async function grantAdmin(databaseUrl: string, email: string) {
+  const client = postgres(databaseUrl, { max: 1 });
+  try {
+    const updated = await drizzle(client)
+      .update(users)
+      .set({ isAdmin: true })
+      .where(eq(users.email, emailSchema.parse(email.trim().toLowerCase())))
+      .returning({ id: users.id });
+    if (!updated.length) throw new Error("No account uses that email");
+  } finally {
+    await client.end();
+  }
+}

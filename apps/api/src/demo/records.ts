@@ -747,7 +747,7 @@ ${s.lines.map((l) => `<tr><td>${l.date}</td><td>${escapeHtml(l.reference)}</td><
     return { status: "in_review" };
   }
 
-  /** Investor-demo reviewer control: decides the signed-in user's own case. */
+  /** Admin decision on a user's case in review. */
   async review(userId: string, kind: string, body: unknown) {
     const safeKind = parse(z.enum(["kyc", "kyb"]), kind);
     const input = parse(

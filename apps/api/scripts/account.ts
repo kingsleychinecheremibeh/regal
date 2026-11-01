@@ -3,7 +3,7 @@ import { stdin, stdout } from "node:process";
 import { emitKeypressEvents } from "node:readline";
 import { createInterface } from "node:readline/promises";
 import { z } from "zod";
-import { provisionAccount } from "../src/provisioning";
+import { grantAdmin, provisionAccount } from "../src/provisioning";
 
 const emailSchema = z.email().max(254);
 const nameSchema = z.string().trim().min(2).max(120);
@@ -45,8 +45,11 @@ async function main() {
   const action = process.argv[2];
   if (!stdin.isTTY || !stdout.isTTY)
     throw new Error("Run this command in an interactive terminal");
-  if (process.argv.length !== 3 || !["provision", "reset"].includes(action))
-    throw new Error("Use account:provision or account:reset");
+  if (
+    process.argv.length !== 3 ||
+    !["provision", "reset", "admin"].includes(action)
+  )
+    throw new Error("Use account:provision, account:reset or account:admin");
   const connection = process.env.DATABASE_URL;
   if (!connection)
     throw new Error("DATABASE_URL is missing from apps/api/.env");
@@ -68,6 +71,12 @@ async function main() {
   const email = emailSchema.parse(
     (await prompt.question("Account email: ")).trim().toLowerCase(),
   );
+  if (action === "admin") {
+    prompt.close();
+    await grantAdmin(connection, email);
+    stdout.write("Admin access granted. Sign in and open /admin.\n");
+    return;
+  }
   const fullName =
     action === "provision"
       ? nameSchema.parse(await prompt.question("Full name: "))
