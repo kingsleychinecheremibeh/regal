@@ -269,7 +269,7 @@ export class AdminService {
     const filter = userFilter.catch("all").parse(query.filter ?? "all");
     const kyc = sql<
       string | null
-    >`(select status from verification_cases v where v.user_id = ${users.id} and v.kind = 'kyc')`;
+    >`(select status from verification_cases v where v.user_id = "users"."id" and v.kind = 'kyc')`;
     const conditions: (SQL | undefined)[] = [
       q
         ? or(ilike(users.email, like(q)), ilike(users.fullName, like(q)))
@@ -280,7 +280,7 @@ export class AdminService {
         ? and(isNull(users.emailVerifiedAt), isNull(users.provisionedAt))
         : undefined,
       filter === "in_review"
-        ? sql`exists (select 1 from verification_cases v where v.user_id = ${users.id} and v.status = 'in_review')`
+        ? sql`exists (select 1 from verification_cases v where v.user_id = "users"."id" and v.status = 'in_review')`
         : undefined,
     ];
     const where = and(...conditions.filter(Boolean));
@@ -941,7 +941,7 @@ export class AdminService {
         createdAt: users.createdAt,
         lastSignIn: sql<
           string | null
-        >`(select max(s.created_at) from authentication_sessions s where s.user_id = ${users.id})`,
+        >`(select max(s.created_at) from authentication_sessions s where s.user_id = "users"."id")`,
       })
       .from(users)
       .where(eq(users.isAdmin, true))
@@ -1073,7 +1073,7 @@ export class AdminService {
         this.db
           .select({
             waitlist: count(),
-            joined: sql<number>`count(*) filter (where exists (select 1 from users u where u.email = ${waitlist.email}))::int`,
+            joined: sql<number>`count(*) filter (where exists (select 1 from users u where u.email = "waitlist"."email"))::int`,
           })
           .from(waitlist),
         this.db.select({ total: count() }).from(demoCards),

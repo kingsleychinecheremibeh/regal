@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { Badge, Modal, Table } from "@/components/dashboard/ui";
 import { amount, date, dateTime, label, money, TYPE_LABEL } from "@/lib/format";
 import { AccountStatus } from "./users";
-import { ACTION_LABEL, Notice, useAction, useAdmin } from "./shared";
+import { ACTION_LABEL, Notice, useAction, useAdmin, useCan } from "./shared";
 import { CaseDetails } from "./verifications";
 
 type Detail = {
@@ -66,6 +66,7 @@ export function AdminUser({ id }: { id: string }) {
   const { busy, notice, run } = useAction(reload);
   const [confirm, setConfirm] = useState<null | "suspend" | "reset">(null);
   const [reason, setReason] = useState("");
+  const can = useCan();
 
   if (error)
     return (
@@ -115,11 +116,11 @@ export function AdminUser({ id }: { id: string }) {
         <div className="adm-actions">
           {user.isAdmin ? (
             <p className="xs mut m0">
-              Admin accounts are managed from the server command line.
+              Admin accounts are managed on the Team page.
             </p>
           ) : (
             <>
-              {user.suspendedAt ? (
+              {!can("suspend") ? null : user.suspendedAt ? (
                 <button
                   className="btn btn-p btn-sm"
                   disabled={!!busy}
@@ -136,20 +137,27 @@ export function AdminUser({ id }: { id: string }) {
                   Suspend account
                 </button>
               )}
-              <button
-                className="btn btn-s btn-sm"
-                disabled={!!busy || data.sessions.length === 0}
-                onClick={() => act("sign-out")}
-              >
-                Sign out everywhere
-              </button>
-              <button
-                className="btn btn-s btn-sm"
-                disabled={!!busy}
-                onClick={() => setConfirm("reset")}
-              >
-                Send password reset
-              </button>
+              {can("support") && (
+                <>
+                  <button
+                    className="btn btn-s btn-sm"
+                    disabled={!!busy || data.sessions.length === 0}
+                    onClick={() => act("sign-out")}
+                  >
+                    Sign out everywhere
+                  </button>
+                  <button
+                    className="btn btn-s btn-sm"
+                    disabled={!!busy}
+                    onClick={() => setConfirm("reset")}
+                  >
+                    Send password reset
+                  </button>
+                </>
+              )}
+              {!can("suspend") && !can("support") && (
+                <p className="xs mut m0">Your role is read-only.</p>
+              )}
             </>
           )}
         </div>
@@ -215,6 +223,8 @@ export function AdminUser({ id }: { id: string }) {
           )}
         </section>
       </div>
+
+      <Notes userId={id} />
 
       <section className="card pad mt">
         <h3 className="adm-h3">Verification</h3>
@@ -368,5 +378,68 @@ function BackLink() {
     <Link href="/admin/users" className="adm-back">
       <ArrowLeft size={15} aria-hidden="true" /> All users
     </Link>
+  );
+}
+
+type Note = {
+  id: string;
+  body: string;
+  createdAt: string;
+  author: string | null;
+};
+
+/** Staff-only notes. The customer never sees these. */
+function Notes({ userId }: { userId: string }) {
+  const { data, reload } = useAdmin<Note[]>(`admin/users/${userId}/notes`);
+  const { busy, notice, run } = useAction(reload);
+  const can = useCan();
+  const [text, setText] = useState("");
+  return (
+    <section className="card pad mt">
+      <h3 className="adm-h3">
+        Staff notes <span className="xs mut">only visible to the team</span>
+      </h3>
+      {can("notes") && (
+        <div className="adm-note-new">
+          <textarea
+            rows={2}
+            maxLength={1000}
+            aria-label="New staff note"
+            placeholder="e.g. Called on 12 Nov, documents coming by Friday."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <button
+            className="btn btn-p btn-sm"
+            disabled={!!busy || text.trim().length < 2}
+            onClick={async () => {
+              if (
+                await run("note", `admin/users/${userId}/notes`, { body: text })
+              )
+                setText("");
+            }}
+          >
+            Add note
+          </button>
+        </div>
+      )}
+      <Notice notice={notice} />
+      {!data ? (
+        <p className="mut">Loading…</p>
+      ) : !data.length ? (
+        <p className="mut m0">No notes yet.</p>
+      ) : (
+        <ul className="adm-notes">
+          {data.map((n) => (
+            <li key={n.id}>
+              <p>{n.body}</p>
+              <span className="xs mut">
+                {n.author ?? "Former admin"} · {dateTime(n.createdAt)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

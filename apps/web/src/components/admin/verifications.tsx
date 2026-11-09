@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Badge, Empty } from "@/components/dashboard/ui";
 import { dateTime } from "@/lib/format";
-import { Head, Notice, useAction, useAdmin } from "./shared";
+import { Head, Notice, useAction, useAdmin, useCan } from "./shared";
 
 type Case = {
   userId: string;
@@ -83,6 +83,7 @@ export function AdminVerifications() {
   );
   const { busy, notice, run } = useAction(reload);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const can = useCan();
 
   return (
     <>
@@ -153,7 +154,7 @@ export function AdminVerifications() {
                   {c.note && ` · note: ${c.note}`}
                 </p>
                 <CaseDetails data={c.data} />
-                {c.status === "in_review" && (
+                {c.status === "in_review" && can("decide") && (
                   <div className="adm-decide">
                     <input
                       aria-label="Note to the customer"

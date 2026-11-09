@@ -777,6 +777,18 @@ integration("Regalvest API with isolated PostgreSQL", () => {
     const reports = await call("GET", "admin/reports", cookie);
     expect(reports.body.funnel[0]).toMatchObject({ step: "Signed up" });
     expect(reports.body.usage.length).toBeGreaterThan(0);
+    // Correlated subqueries must compare against the outer row.
+    const [{ joined }] = await sql<{ joined: number }[]>`
+      select count(*)::int as joined from waitlist w
+      where exists (select 1 from users u where u.email = w.email)`;
+    expect(reports.body.waitlist.joined).toBe(joined);
+    const reviewing = await call("GET", "admin/users?filter=in_review", cookie);
+    expect(reviewing.body.total).toBe(reviewing.body.rows.length);
+    expect(
+      (await call("GET", "admin/team", cookie)).body.find(
+        (m: { email: string }) => m.email === accountEmail,
+      ).lastSignIn,
+    ).not.toBeNull();
     const health = await call("GET", "admin/status", cookie);
     expect(health.body.database.ok).toBe(true);
     const hits = await call(

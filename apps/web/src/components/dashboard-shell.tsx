@@ -234,9 +234,38 @@ function Frame({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <main className="main" id="main">
+          <Announcements />
           {children}
         </main>
       </div>
+    </div>
+  );
+}
+
+type Announcement = { id: string; title: string; body: string; tone: string };
+
+/** Banners published from the admin console; each can be dismissed. */
+function Announcements() {
+  const { data } = useData<Announcement[]>("demo/announcements");
+  const [hidden, setHidden] = useState<string[]>([]);
+  const shown = (data ?? []).filter((a) => !hidden.includes(a.id));
+  if (!shown.length) return null;
+  return (
+    <div className="ann-list">
+      {shown.map((a) => (
+        <div key={a.id} className={`adm-banner ${a.tone}`} role="status">
+          <span>
+            <b>{a.title}</b> {a.body}
+          </span>
+          <button
+            type="button"
+            aria-label="Dismiss announcement"
+            onClick={() => setHidden([...hidden, a.id])}
+          >
+            ×
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

@@ -7,7 +7,17 @@ import { FIAT, TYPE_LABEL, date, dateTime, money } from "@/lib/format";
 import type { Tx } from "@/lib/types";
 import { useAction, useDash, useData } from "./context";
 import { TxTable } from "./tx";
-import { Badge, Empty, Field, Kpi, PageHead, Seg, Skeleton, Table } from "./ui";
+import {
+  Badge,
+  Empty,
+  Field,
+  Kpi,
+  Modal,
+  PageHead,
+  Seg,
+  Skeleton,
+  Table,
+} from "./ui";
 
 const TYPES = Object.keys(TYPE_LABEL);
 const STATUSES = ["completed", "pending", "failed", "reversed"];
@@ -501,6 +511,7 @@ export function Help() {
   const [error, setError] = useState("");
   const { pending, run } = useAction();
   const { data } = useData<Ticket[]>("demo/tickets");
+  const [viewing, setViewing] = useState<Ticket | null>(null);
   async function submit() {
     setError("");
     const result = await run(() => api("demo/tickets", { body: form }), {
@@ -561,22 +572,35 @@ export function Help() {
             Submit
           </button>
           <p className="xs mut mt m0">
-            Demo tickets are stored with your account but are not monitored by
-            staff.
+            Our team replies here. You will get a notification when they do.
           </p>
         </div>
         <div className="card pad">
           <h3>Your tickets</h3>
           <Table
-            head={["ID", "Subject", "Status", "Opened"]}
+            head={["ID", "Subject", "Status", "Opened", ""]}
             rows={(data ?? []).map((t) => [
               `T-${t.number}`,
               t.subject,
-              <Badge key="s" status={t.status} />,
+              <Badge
+                key="s"
+                status={t.status}
+                text={t.status === "pending" ? "Replied" : undefined}
+              />,
               date(t.createdAt),
+              <button
+                key="v"
+                className="btn btn-s btn-sm"
+                onClick={() => setViewing(t)}
+              >
+                View
+              </button>,
             ])}
             empty="No tickets yet."
           />
+          {viewing && (
+            <TicketThread ticket={viewing} onClose={() => setViewing(null)} />
+          )}
           <h3 className="mt">Other ways to reach us</h3>
           <p className="sm mut m0">
             Use the <Link href="/contact">contact form</Link> on the public
@@ -585,5 +609,81 @@ export function Help() {
         </div>
       </div>
     </>
+  );
+}
+
+type ThreadData = {
+  ticket: Ticket & { body: string };
+  messages: {
+    id: string;
+    body: string;
+    fromStaff: boolean;
+    createdAt: string;
+  }[];
+};
+
+function TicketThread({
+  ticket,
+  onClose,
+}: {
+  ticket: Ticket;
+  onClose: () => void;
+}) {
+  const { data } = useData<ThreadData>(`demo/tickets/${ticket.id}`);
+  const { pending, run } = useAction();
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
+  async function send() {
+    setError("");
+    const ok = await run(
+      () => api(`demo/tickets/${ticket.id}/reply`, { body: { body: text } }),
+      { success: "Message sent.", onError: setError },
+    );
+    if (ok) setText("");
+  }
+  return (
+    <Modal title={`T-${ticket.number} · ${ticket.subject}`} onClose={onClose}>
+      <div className="adm-thread">
+        {data && (
+          <div className="adm-msgbox customer">
+            <div className="xs mut">
+              You · {dateTime(data.ticket.createdAt)}
+            </div>
+            <p>{data.ticket.body}</p>
+          </div>
+        )}
+        {data?.messages.map((m) => (
+          <div
+            key={m.id}
+            className={`adm-msgbox ${m.fromStaff ? "staff" : "customer"}`}
+          >
+            <div className="xs mut">
+              {m.fromStaff ? "TurboXGlobal support" : "You"} ·{" "}
+              {dateTime(m.createdAt)}
+            </div>
+            <p>{m.body}</p>
+          </div>
+        ))}
+        {!data && <p className="mut">Loading…</p>}
+      </div>
+      <Field label="Reply" id="t-r">
+        <textarea
+          id="t-r"
+          rows={2}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+      </Field>
+      <p className="err-t" role="alert">
+        {error}
+      </p>
+      <button
+        className="btn btn-d btn-sm"
+        onClick={send}
+        disabled={pending || text.trim().length < 2}
+      >
+        Send
+      </button>
+    </Modal>
   );
 }

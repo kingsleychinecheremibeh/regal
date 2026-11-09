@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { api } from "@/lib/api";
 
 export type Paged<T> = {
@@ -244,4 +250,39 @@ export const ACTION_LABEL: Record<string, string> = {
   "ticket.open": "Reopened ticket",
   "ticket.pending": "Marked ticket pending",
   "ticket.resolved": "Resolved ticket",
+  "ticket.reply": "Replied to ticket",
+  "user.note": "Added a staff note",
+  "announcement.publish": "Published announcement",
+  "announcement.hide": "Hid announcement",
+  "team.add": "Added admin",
+  "team.role": "Changed admin role",
+  "team.remove": "Removed admin",
+  "reports.export": "Exported report",
+};
+
+export type AdminRole = "owner" | "compliance" | "support" | "viewer";
+const PERMISSIONS: Record<string, AdminRole[]> = {
+  suspend: ["owner", "compliance"],
+  decide: ["owner", "compliance"],
+  support: ["owner", "support"],
+  notes: ["owner", "compliance", "support"],
+  owner: ["owner"],
+};
+export const AdminContext = createContext<{ role: AdminRole; email: string }>({
+  role: "viewer",
+  email: "",
+});
+/** The signed-in admin's role and email. */
+export const useMe = () => useContext(AdminContext);
+/** Whether the signed-in admin may use an action; the API checks again. */
+export function useCan() {
+  const { role } = useContext(AdminContext);
+  return (action: keyof typeof PERMISSIONS) =>
+    PERMISSIONS[action].includes(role);
+}
+export const ROLE_LABEL: Record<AdminRole, string> = {
+  owner: "Owner",
+  compliance: "Compliance",
+  support: "Support",
+  viewer: "Viewer",
 };

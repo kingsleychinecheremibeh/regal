@@ -11,6 +11,7 @@ import {
   Toolbar,
   useAction,
   useAdmin,
+  useCan,
   withQuery,
   type Paged,
 } from "./shared";
@@ -81,6 +82,7 @@ function Tickets() {
     withQuery("admin/tickets", { status, page }),
   );
   const { busy, notice, run } = useAction(reload);
+  const can = useCan();
   return (
     <>
       <div className="seg mb" role="group" aria-label="Ticket status">
@@ -122,27 +124,39 @@ function Tickets() {
                   <b>{t.fullName}</b>
                   <span className="xs mut">{t.email}</span>
                 </Link>,
-                <span key="r" className="adm-msg">
+                <Link
+                  key="r"
+                  href={`/admin/support/${t.id}`}
+                  className="adm-msg adm-user"
+                >
                   <b>{t.subject}</b>
                   <span>{t.body}</span>
-                </span>,
+                </Link>,
                 <Badge key="s" status={t.status} />,
                 dateTime(t.createdAt),
                 <div key="a" className="row">
-                  {(NEXT[t.status] ?? []).map(([to, text]) => (
-                    <button
-                      key={to}
-                      className={`btn btn-sm ${to === "resolved" ? "btn-p" : "btn-s"}`}
-                      disabled={!!busy}
-                      onClick={() =>
-                        run(t.id + to, `admin/tickets/${t.id}/status`, {
-                          status: to,
-                        })
-                      }
-                    >
-                      {text}
-                    </button>
-                  ))}
+                  <Link
+                    className="btn btn-s btn-sm"
+                    href={`/admin/support/${t.id}`}
+                  >
+                    Open
+                  </Link>
+                  {(can("support") ? (NEXT[t.status] ?? []) : []).map(
+                    ([to, text]) => (
+                      <button
+                        key={to}
+                        className={`btn btn-sm ${to === "resolved" ? "btn-p" : "btn-s"}`}
+                        disabled={!!busy}
+                        onClick={() =>
+                          run(t.id + to, `admin/tickets/${t.id}/status`, {
+                            status: to,
+                          })
+                        }
+                      >
+                        {text}
+                      </button>
+                    ),
+                  )}
                 </div>,
               ])}
             />

@@ -1659,3 +1659,290 @@ a.adm-user:hover b {
     max-width: none;
   }
 }
+
+/* ---------- admin console: search, threads, banners, reports, status ---------- */
+.adm-role {
+  display: inline-block;
+  width: fit-content;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--lemon);
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 1 !important;
+}
+.adm-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  width: min(420px, 100%);
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--mut);
+}
+.adm .adm-search input[type="search"] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 8px 0;
+  min-width: 0;
+  flex: 1;
+}
+.adm-search input:focus {
+  outline: none;
+}
+.adm-search:focus-within {
+  outline: 3px solid var(--gold);
+  outline-offset: 1px;
+}
+.adm-search-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 60;
+  max-height: 70vh;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surf);
+  box-shadow: 0 16px 40px rgba(5, 10, 28, 0.25);
+}
+.adm-search-pop h4 {
+  margin: 8px 8px 4px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+.adm-search-pop a {
+  display: grid;
+  padding: 7px 8px;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+}
+.adm-search-pop a span {
+  font-size: 12px;
+  color: var(--mut);
+}
+.adm-search-pop a:hover {
+  background: var(--soft);
+}
+.adm-thread {
+  display: grid;
+  gap: 12px;
+}
+.adm-msgbox {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+}
+.adm-msgbox p {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.adm-msgbox.customer {
+  justify-self: start;
+  background: var(--soft);
+}
+.adm-msgbox.staff {
+  justify-self: end;
+  background: var(--infobg);
+  border-color: transparent;
+}
+.adm-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border-left: 4px solid var(--gold);
+  background: var(--warnbg);
+  color: var(--text);
+  font-size: 14px;
+}
+.adm-banner.info {
+  border-color: #5b7bd5;
+  background: var(--infobg);
+}
+.adm-banner.success {
+  border-color: var(--ok);
+  background: var(--okbg);
+}
+.adm-banner button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ann-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.adm-note-new {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.adm-note-new textarea {
+  flex: 1;
+}
+.adm-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.adm-notes li {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  background: var(--warnbg);
+  border-left: 4px solid var(--gold);
+}
+.adm-notes p {
+  margin: 0 0 4px;
+  white-space: pre-wrap;
+}
+.adm-weeks {
+  margin: 0;
+}
+.adm-weeks-plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 180px;
+  border-bottom: 1px solid var(--line);
+}
+.adm-weeks-plot > div {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+.adm-weeks-plot span {
+  width: 40%;
+  min-height: 2px;
+  border-radius: 3px 3px 0 0;
+}
+.adm-weeks-plot small {
+  position: absolute;
+  bottom: -20px;
+  font-size: 10px;
+  color: var(--mut);
+}
+.adm-weeks figcaption {
+  margin-top: 28px;
+  gap: 6px;
+  align-items: center;
+}
+.adm-weeks-plot .s,
+.adm-key.s {
+  background: #5b7bd5;
+}
+.adm-weeks-plot .v,
+.adm-key.v {
+  background: var(--ok);
+}
+.adm-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-left: 8px;
+}
+.adm-funnel {
+  display: grid;
+  gap: 16px;
+}
+.adm-funnel-bar {
+  height: 14px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+}
+.adm-funnel-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--lemon), var(--ok));
+}
+.adm-overall {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 16px;
+}
+.adm-overall.ok {
+  background: var(--okbg);
+  border-left: 5px solid var(--ok);
+}
+.adm-overall.warn {
+  background: var(--warnbg);
+  border-left: 5px solid var(--gold);
+}
+.adm-overall.down {
+  background: var(--errbg);
+  border-left: 5px solid var(--err);
+}
+.adm-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.adm-dot i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.adm-status.ok .adm-dot i {
+  background: var(--ok);
+  box-shadow: 0 0 0 4px var(--okbg);
+}
+.adm-status.warn .adm-dot i {
+  background: var(--gold);
+  box-shadow: 0 0 0 4px var(--warnbg);
+}
+.adm-status.down .adm-dot i {
+  background: var(--err);
+  box-shadow: 0 0 0 4px var(--errbg);
+}
+.adm-status-head {
+  margin: 12px 0;
+  font: 600 17px/1.3 var(--fd);
+}
+@media (max-width: 860px) {
+  .adm-search {
+    width: auto;
+    flex: 1;
+  }
+  .adm-msgbox {
+    max-width: 92%;
+  }
+}
