@@ -482,8 +482,17 @@ export class AdminService {
   async decide(adminId: string, userId: string, kind: string, body: unknown) {
     const result = await this.records.review(userId, kind, body);
     const decision = (body as { decision?: string })?.decision ?? "";
-    await this.log(adminId, `verification.${decision}`, userId, kind);
-    return result;
+    const what = kind === "kyb" ? "Business" : "Identity";
+    await this.log(adminId, `verification.${decision}`, userId, what);
+    const done: Record<string, string> = {
+      verified: "approved",
+      action_required: "sent back for more information",
+      rejected: "rejected",
+    };
+    return {
+      ...(result as object),
+      message: `${what} verification ${done[decision] ?? "updated"}.`,
+    };
   }
 
   private ledgerWhere(query: {

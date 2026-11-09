@@ -90,9 +90,19 @@ export function AuthForm({
             : result.message || "Request failed",
         );
       if (mode === "sign-in") {
+        // Admins land in the admin console, everyone else in their dashboard.
+        // A "next" link is followed only inside an area the account may use.
+        const isAdmin = Boolean(result?.user?.isAdmin);
         const destination = search.get("next");
+        const allowed = isAdmin
+          ? /^\/(dashboard|admin)(\/|$|\?)/
+          : /^\/dashboard(\/|$|\?)/;
         router.replace(
-          destination?.startsWith("/dashboard") ? destination : "/dashboard",
+          destination && allowed.test(destination)
+            ? destination
+            : isAdmin
+              ? "/admin"
+              : "/dashboard",
         );
         router.refresh();
       } else if (mode === "verify" || mode === "reset-password") {
