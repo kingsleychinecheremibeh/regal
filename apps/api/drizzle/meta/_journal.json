@@ -43,6 +43,13 @@
       "when": 1794256939781,
       "tag": "0005_admin_console",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794259230800,
+      "tag": "0006_admin_features",
+      "breakpoints": true
     }
   ]
 }

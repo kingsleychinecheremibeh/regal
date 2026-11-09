@@ -675,6 +675,150 @@ integration("Regalvest API with isolated PostgreSQL", () => {
       ]),
     );
 
+    // Ticket conversation: the customer opens, staff reply, customer sees it.
+    const opened = await call("POST", "demo/tickets", cookie, {
+      subject: "Card question",
+      body: "How do I freeze a card?",
+    });
+    const ticketId = opened.body.id as string;
+    expect(
+      (
+        await call("POST", `admin/tickets/${ticketId}/reply`, cookie, {
+          body: "Open Cards and press Freeze.",
+        })
+      ).status,
+    ).toBe(200);
+    const thread = await call("GET", `demo/tickets/${ticketId}`, cookie);
+    expect(thread.body.ticket.status).toBe("pending");
+    expect(thread.body.messages).toEqual([
+      expect.objectContaining({ fromStaff: true }),
+    ]);
+    expect(
+      (
+        await call("POST", `demo/tickets/${ticketId}/reply`, cookie, {
+          body: "Thanks, done.",
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (await call("GET", `admin/tickets/${ticketId}`, cookie)).body.messages,
+    ).toHaveLength(2);
+
+    // Staff notes, announcements, team, reports, status and search.
+    expect(
+      (
+        await call("POST", `admin/users/${otherId}/notes`, cookie, {
+          body: "Called about documents.",
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (await call("GET", `admin/users/${otherId}/notes`, cookie)).body[0].body,
+    ).toBe("Called about documents.");
+    expect(
+      (
+        await call("POST", "admin/announcements", cookie, {
+          title: "Maintenance tonight",
+          body: "Short downtime at 10pm.",
+          tone: "warning",
+        })
+      ).status,
+    ).toBe(200);
+    const banners = await call("GET", "demo/announcements", cookie);
+    expect(banners.body[0]).toMatchObject({ title: "Maintenance tonight" });
+    expect(
+      (
+        await call(
+          "POST",
+          `admin/announcements/${banners.body[0].id}`,
+          cookie,
+          {
+            active: false,
+          },
+        )
+      ).status,
+    ).toBe(200);
+    expect((await call("GET", "demo/announcements", cookie)).body).toEqual([]);
+    const team = await call("GET", "admin/team", cookie);
+    expect(team.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ email: accountEmail }),
+      ]),
+    );
+    expect(
+      (
+        await call("POST", `admin/team/${account.id}/role`, cookie, {
+          role: "viewer",
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await call("POST", "admin/team", cookie, {
+          email: otherEmail,
+          role: "viewer",
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await call("POST", `admin/team/${otherId}/role`, cookie, {
+          role: "support",
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (await call("POST", `admin/team/${otherId}/remove`, cookie, {})).status,
+    ).toBe(200);
+    expect(
+      (await call("POST", `admin/team/${account.id}/remove`, cookie, {}))
+        .status,
+    ).toBe(400);
+    const reports = await call("GET", "admin/reports", cookie);
+    expect(reports.body.funnel[0]).toMatchObject({ step: "Signed up" });
+    expect(reports.body.usage.length).toBeGreaterThan(0);
+    const health = await call("GET", "admin/status", cookie);
+    expect(health.body.database.ok).toBe(true);
+    const hits = await call(
+      "GET",
+      `admin/search?q=${encodeURIComponent(accountEmail)}`,
+      cookie,
+    );
+    expect(hits.body.users[0]).toMatchObject({ email: accountEmail });
+    expect((await call("GET", "admin/me", cookie)).body.role).toBe("owner");
+    // A viewer can read but not act; support can reply but not suspend.
+    await drizzle(sql)
+      .update(users)
+      .set({ adminRole: "viewer" })
+      .where(eq(users.id, account.id));
+    expect((await call("GET", "admin/overview", cookie)).status).toBe(200);
+    expect(
+      (
+        await call("POST", `admin/users/${otherId}/notes`, cookie, {
+          body: "Not allowed",
+        })
+      ).status,
+    ).toBe(403);
+    expect((await call("GET", "admin/waitlist.csv", cookie)).status).toBe(403);
+    await drizzle(sql)
+      .update(users)
+      .set({ adminRole: "support" })
+      .where(eq(users.id, account.id));
+    expect(
+      (
+        await call("POST", `admin/tickets/${ticketId}/reply`, cookie, {
+          body: "Support can reply.",
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (await call("POST", `admin/users/${otherId}/suspend`, cookie, {})).status,
+    ).toBe(403);
+    await drizzle(sql)
+      .update(users)
+      .set({ adminRole: "owner" })
+      .where(eq(users.id, account.id));
+
     expect(
       (await post("auth/forgot-password", { email: accountEmail })).status,
     ).toBe(200);

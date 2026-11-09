@@ -32,6 +32,8 @@ export const users = pgTable("users", {
   provisionedAt: timestamp("provisioned_at", { withTimezone: true }),
   isAdmin: boolean("is_admin").notNull().default(false),
   suspendedAt: timestamp("suspended_at", { withTimezone: true }),
+  /** owner | compliance | support | viewer; only meaningful when isAdmin. */
+  adminRole: varchar("admin_role", { length: 16 }),
   termsAcceptedAt: timestamp("terms_accepted_at", {
     withTimezone: true,
   }).notNull(),
@@ -362,3 +364,49 @@ export const adminAuditLog = pgTable(
   },
   (table) => [index("admin_audit_log_created").on(table.createdAt)],
 );
+
+/** Conversation on a support ticket: customer messages and staff replies. */
+export const ticketMessages = pgTable(
+  "ticket_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ticketId: uuid("ticket_id")
+      .notNull()
+      .references(() => supportTickets.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    fromStaff: boolean("from_staff").notNull().default(false),
+    body: text("body").notNull(),
+    createdAt: created(),
+  },
+  (table) => [index("ticket_messages_ticket").on(table.ticketId)],
+);
+
+/** Staff-only notes on an account. Never shown to the customer. */
+export const userNotes = pgTable(
+  "user_notes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: owner(),
+    authorId: uuid("author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    body: varchar("body", { length: 1000 }).notNull(),
+    createdAt: created(),
+  },
+  (table) => [index("user_notes_user").on(table.userId)],
+);
+
+/** Banners shown on every customer dashboard while active. */
+export const announcements = pgTable("announcements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 120 }).notNull(),
+  body: varchar("body", { length: 600 }).notNull(),
+  tone: varchar("tone", { length: 12 }).notNull().default("info"),
+  active: boolean("active").notNull().default(true),
+  createdBy: uuid("created_by").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  createdAt: created(),
+});

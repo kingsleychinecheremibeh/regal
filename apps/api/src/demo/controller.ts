@@ -8,6 +8,7 @@ import {
   HttpCode,
   Inject,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Put,
@@ -371,6 +372,25 @@ export class DemoController {
 
   @Get("tickets") tickets(@Req() req: UserRequest) {
     return this.records.tickets(req.userId);
+  }
+
+  @Get("tickets/:id") ticket(
+    @Req() req: UserRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.records.ticket(req.userId, id);
+  }
+
+  @Post("tickets/:id/reply") @HttpCode(200) replyTicket(
+    @Req() req: UserRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.records.replyTicket(req.userId, id, body);
+  }
+
+  @Get("announcements") announcements() {
+    return this.records.activeAnnouncements();
   }
 
   @Post("tickets") createTicket(

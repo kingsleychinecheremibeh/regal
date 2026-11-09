@@ -16,8 +16,10 @@ import {
   Post,
   Query,
   Req,
+  SetMetadata,
   UseGuards,
 } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
 import { ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   and,
@@ -36,9 +38,16 @@ import {
 import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { AuthService, SessionGuard } from "./auth";
+import { type AppConfig } from "./config";
+import { CONFIG } from "./db/database";
 import {
   accountProfiles,
   adminAuditLog,
+  announcements,
+  demoCards,
+  demoNotifications,
+  ticketMessages,
+  userNotes,
   authenticationSessions,
   contactMessages,
   demoHoldings,
@@ -51,22 +60,57 @@ import {
 import { DemoCore } from "./demo/core";
 import { RecordsService } from "./demo/records";
 
-type AdminRequest = { userId: string };
+type AdminRequest = { userId: string; adminRole: AdminRole; method: string };
 const PAGE_SIZE = 25;
 
-/** Runs after SessionGuard and admits only accounts flagged as admin. */
+export const ADMIN_ROLES = [
+  "owner",
+  "compliance",
+  "support",
+  "viewer",
+] as const;
+export type AdminRole = (typeof ADMIN_ROLES)[number];
+const ROLES_KEY = "adminRoles";
+/**
+ * Roles allowed to use a route besides the owner, who may use every route.
+ * Without it, reads are open to every admin and writes are owner-only.
+ */
+const Allow = (...roles: AdminRole[]) => SetMetadata(ROLES_KEY, roles);
+const roleOf = (value: string | null): AdminRole =>
+  (ADMIN_ROLES as readonly string[]).includes(value ?? "")
+    ? (value as AdminRole)
+    : "owner";
+
+/** Runs after SessionGuard: admits admins, then checks the route's roles. */
 @Injectable()
 export class AdminGuard implements CanActivate {
-  constructor(@Inject(DemoCore) private readonly core: DemoCore) {}
+  constructor(
+    @Inject(DemoCore) private readonly core: DemoCore,
+    @Inject(Reflector) private readonly reflector: Reflector,
+  ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const { userId } = context.switchToHttp().getRequest<AdminRequest>();
+    const req = context.switchToHttp().getRequest<AdminRequest>();
     const [user] = await this.core.db
-      .select({ isAdmin: users.isAdmin, suspendedAt: users.suspendedAt })
+      .select({
+        isAdmin: users.isAdmin,
+        adminRole: users.adminRole,
+        suspendedAt: users.suspendedAt,
+      })
       .from(users)
-      .where(eq(users.id, userId));
+      .where(eq(users.id, req.userId));
     if (!user?.isAdmin || user.suspendedAt)
       throw new ForbiddenException("Admin access only.");
-    return true;
+    const role = roleOf(user.adminRole);
+    req.adminRole = role;
+    if (role === "owner") return true;
+    const allowed = this.reflector.getAllAndOverride<AdminRole[] | undefined>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (allowed ? allowed.includes(role) : req.method === "GET") return true;
+    throw new ForbiddenException(
+      `Your admin role (${role}) cannot do this. Ask an owner.`,
+    );
   }
 }
 
@@ -101,6 +145,7 @@ export class AdminService {
     @Inject(DemoCore) private readonly core: DemoCore,
     @Inject(RecordsService) private readonly records: RecordsService,
     @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
   private get db() {
@@ -722,6 +767,475 @@ export class AdminService {
     ]);
     return { rows, page: p, pageSize: PAGE_SIZE, total: Number(total.total) };
   }
+
+  /* ---------- ticket conversations ---------- */
+
+  async ticket(id: string) {
+    const [ticket] = await this.db
+      .select({
+        id: supportTickets.id,
+        number: supportTickets.number,
+        subject: supportTickets.subject,
+        body: supportTickets.body,
+        status: supportTickets.status,
+        createdAt: supportTickets.createdAt,
+        userId: users.id,
+        email: users.email,
+        fullName: users.fullName,
+      })
+      .from(supportTickets)
+      .innerJoin(users, eq(users.id, supportTickets.userId))
+      .where(eq(supportTickets.id, id))
+      .limit(1);
+    if (!ticket) throw new NotFoundException("Ticket not found.");
+    const messages = await this.db
+      .select({
+        id: ticketMessages.id,
+        body: ticketMessages.body,
+        fromStaff: ticketMessages.fromStaff,
+        createdAt: ticketMessages.createdAt,
+        author: users.fullName,
+      })
+      .from(ticketMessages)
+      .leftJoin(users, eq(users.id, ticketMessages.authorId))
+      .where(eq(ticketMessages.ticketId, id))
+      .orderBy(ticketMessages.createdAt);
+    return { ticket, messages };
+  }
+
+  async reply(adminId: string, id: string, body: unknown) {
+    const input = z
+      .strictObject({
+        body: z.string().trim().min(2, "Write a reply.").max(4000),
+        resolve: z.boolean().optional(),
+      })
+      .parse(body);
+    const [ticket] = await this.db
+      .select({
+        userId: supportTickets.userId,
+        number: supportTickets.number,
+      })
+      .from(supportTickets)
+      .where(eq(supportTickets.id, id))
+      .limit(1);
+    if (!ticket) throw new NotFoundException("Ticket not found.");
+    const status = input.resolve ? "resolved" : "pending";
+    await this.db.transaction(async (tx) => {
+      await tx.insert(ticketMessages).values({
+        ticketId: id,
+        authorId: adminId,
+        fromStaff: true,
+        body: input.body,
+      });
+      await tx
+        .update(supportTickets)
+        .set({ status })
+        .where(eq(supportTickets.id, id));
+      await tx.insert(demoNotifications).values({
+        userId: ticket.userId,
+        category: "Account",
+        message: `Support replied to ticket T-${ticket.number}.`,
+      });
+    });
+    await this.log(
+      adminId,
+      "ticket.reply",
+      ticket.userId,
+      `Ticket #${ticket.number}${input.resolve ? " (resolved)" : ""}`,
+    );
+    return { message: `Reply sent on ticket #${ticket.number}.` };
+  }
+
+  /* ---------- staff notes ---------- */
+
+  notes(userId: string) {
+    return this.db
+      .select({
+        id: userNotes.id,
+        body: userNotes.body,
+        createdAt: userNotes.createdAt,
+        author: users.fullName,
+      })
+      .from(userNotes)
+      .leftJoin(users, eq(users.id, userNotes.authorId))
+      .where(eq(userNotes.userId, userId))
+      .orderBy(desc(userNotes.createdAt));
+  }
+
+  async addNote(adminId: string, userId: string, body: unknown) {
+    const input = z
+      .strictObject({ body: z.string().trim().min(2).max(1000) })
+      .parse(body);
+    const [user] = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, userId));
+    if (!user) throw new NotFoundException("User not found.");
+    await this.db
+      .insert(userNotes)
+      .values({ userId, authorId: adminId, body: input.body });
+    await this.log(adminId, "user.note", userId);
+    return { message: "Note added." };
+  }
+
+  /* ---------- announcements ---------- */
+
+  listAnnouncements() {
+    return this.db
+      .select({
+        id: announcements.id,
+        title: announcements.title,
+        body: announcements.body,
+        tone: announcements.tone,
+        active: announcements.active,
+        createdAt: announcements.createdAt,
+        author: users.fullName,
+      })
+      .from(announcements)
+      .leftJoin(users, eq(users.id, announcements.createdBy))
+      .orderBy(desc(announcements.createdAt))
+      .limit(50);
+  }
+
+  async createAnnouncement(adminId: string, body: unknown) {
+    const input = z
+      .strictObject({
+        title: z.string().trim().min(3).max(120),
+        body: z.string().trim().min(3).max(600),
+        tone: z.enum(["info", "success", "warning"]).default("info"),
+      })
+      .parse(body);
+    await this.db
+      .insert(announcements)
+      .values({ ...input, createdBy: adminId });
+    await this.log(adminId, "announcement.publish", null, input.title);
+    return { message: "Announcement published to all dashboards." };
+  }
+
+  async setAnnouncement(adminId: string, id: string, body: unknown) {
+    const { active } = z.strictObject({ active: z.boolean() }).parse(body);
+    const [row] = await this.db
+      .update(announcements)
+      .set({ active })
+      .where(eq(announcements.id, id))
+      .returning({ title: announcements.title });
+    if (!row) throw new NotFoundException("Announcement not found.");
+    await this.log(
+      adminId,
+      active ? "announcement.publish" : "announcement.hide",
+      null,
+      row.title,
+    );
+    return { message: active ? "Announcement shown." : "Announcement hidden." };
+  }
+
+  /* ---------- team and roles ---------- */
+
+  team() {
+    return this.db
+      .select({
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        adminRole: users.adminRole,
+        createdAt: users.createdAt,
+        lastSignIn: sql<
+          string | null
+        >`(select max(s.created_at) from authentication_sessions s where s.user_id = ${users.id})`,
+      })
+      .from(users)
+      .where(eq(users.isAdmin, true))
+      .orderBy(users.createdAt);
+  }
+
+  private async owners() {
+    const [row] = await this.db
+      .select({ total: count() })
+      .from(users)
+      .where(
+        and(
+          eq(users.isAdmin, true),
+          or(eq(users.adminRole, "owner"), isNull(users.adminRole)),
+        ),
+      );
+    return Number(row.total);
+  }
+
+  async addAdmin(adminId: string, body: unknown) {
+    const input = z
+      .strictObject({
+        email: z.string().trim().toLowerCase().email(),
+        role: z.enum(ADMIN_ROLES),
+      })
+      .parse(body);
+    const [user] = await this.db
+      .select({
+        id: users.id,
+        isAdmin: users.isAdmin,
+        suspendedAt: users.suspendedAt,
+      })
+      .from(users)
+      .where(eq(users.email, input.email))
+      .limit(1);
+    if (!user)
+      throw new NotFoundException(
+        "No account with that email. Ask them to sign up first.",
+      );
+    if (user.suspendedAt)
+      throw new BadRequestException("Reactivate this account first.");
+    if (user.isAdmin) throw new BadRequestException("Already an admin.");
+    await this.db
+      .update(users)
+      .set({ isAdmin: true, adminRole: input.role })
+      .where(eq(users.id, user.id));
+    await this.log(adminId, "team.add", user.id, input.role);
+    return { message: `${input.email} added as ${input.role}.` };
+  }
+
+  async setRole(adminId: string, id: string, body: unknown) {
+    const { role } = z.strictObject({ role: z.enum(ADMIN_ROLES) }).parse(body);
+    if (id === adminId)
+      throw new BadRequestException("You cannot change your own role.");
+    const [user] = await this.db
+      .select({ isAdmin: users.isAdmin, adminRole: users.adminRole })
+      .from(users)
+      .where(eq(users.id, id));
+    if (!user?.isAdmin) throw new NotFoundException("Admin not found.");
+    if (roleOf(user.adminRole) === "owner" && role !== "owner")
+      if ((await this.owners()) <= 1)
+        throw new BadRequestException("Keep at least one owner.");
+    await this.db
+      .update(users)
+      .set({ adminRole: role })
+      .where(eq(users.id, id));
+    await this.log(adminId, "team.role", id, role);
+    return { message: `Role changed to ${role}.` };
+  }
+
+  async removeAdmin(adminId: string, id: string) {
+    if (id === adminId)
+      throw new BadRequestException("You cannot remove yourself.");
+    const [user] = await this.db
+      .select({
+        email: users.email,
+        isAdmin: users.isAdmin,
+        adminRole: users.adminRole,
+      })
+      .from(users)
+      .where(eq(users.id, id));
+    if (!user?.isAdmin) throw new NotFoundException("Admin not found.");
+    if (roleOf(user.adminRole) === "owner" && (await this.owners()) <= 1)
+      throw new BadRequestException("Keep at least one owner.");
+    await this.db
+      .update(users)
+      .set({ isAdmin: false, adminRole: null })
+      .where(eq(users.id, id));
+    await this.revokeSessions(id);
+    await this.log(adminId, "team.remove", id);
+    return { message: `${user.email} is no longer an admin.` };
+  }
+
+  /* ---------- reports ---------- */
+
+  async reports() {
+    const week = (column: AnyPgColumn) =>
+      sql<string>`to_char(date_trunc('week', ${column}), 'YYYY-MM-DD')`;
+    const since = new Date(Date.now() - 12 * 7 * 86_400_000);
+    const [weekly, verifiedWeekly, usage, [conversion], [cards], kyc] =
+      await Promise.all([
+        this.db
+          .select({ week: week(users.createdAt), total: count() })
+          .from(users)
+          .where(gte(users.createdAt, since))
+          .groupBy(sql`1`)
+          .orderBy(sql`1`),
+        this.db
+          .select({ week: week(verificationCases.decidedAt), total: count() })
+          .from(verificationCases)
+          .where(
+            and(
+              eq(verificationCases.status, "verified"),
+              gte(verificationCases.decidedAt, since),
+            ),
+          )
+          .groupBy(sql`1`)
+          .orderBy(sql`1`),
+        this.db
+          .select({
+            type: demoLedger.type,
+            total: count(),
+            users: sql<number>`count(distinct ${demoLedger.userId})::int`,
+            usdCents: sql<number>`coalesce(sum(${demoLedger.usdCents}), 0)::float8`,
+          })
+          .from(demoLedger)
+          .groupBy(demoLedger.type)
+          .orderBy(desc(count())),
+        this.db
+          .select({
+            waitlist: count(),
+            joined: sql<number>`count(*) filter (where exists (select 1 from users u where u.email = ${waitlist.email}))::int`,
+          })
+          .from(waitlist),
+        this.db.select({ total: count() }).from(demoCards),
+        this.db
+          .select({ status: verificationCases.status, total: count() })
+          .from(verificationCases)
+          .where(eq(verificationCases.kind, "kyc"))
+          .groupBy(verificationCases.status),
+      ]);
+    const [{ total: userTotal }] = await this.db
+      .select({ total: count() })
+      .from(users);
+    const kycBy = Object.fromEntries(
+      kyc.map((k) => [k.status, Number(k.total)]),
+    );
+    const submitted =
+      (kycBy.in_review ?? 0) +
+      (kycBy.action_required ?? 0) +
+      (kycBy.verified ?? 0) +
+      (kycBy.rejected ?? 0);
+    return {
+      weekly: weekly.map((w) => ({ week: w.week, total: Number(w.total) })),
+      verifiedWeekly: verifiedWeekly.map((w) => ({
+        week: w.week,
+        total: Number(w.total),
+      })),
+      funnel: [
+        { step: "Signed up", total: Number(userTotal) },
+        { step: "Submitted identity", total: submitted },
+        { step: "Verified", total: kycBy.verified ?? 0 },
+      ],
+      usage: usage.map((u) => ({
+        type: u.type,
+        total: Number(u.total),
+        users: u.users,
+        usdCents: Number(u.usdCents),
+      })),
+      waitlist: {
+        total: Number(conversion.waitlist),
+        joined: conversion.joined,
+      },
+      cards: Number(cards.total),
+    };
+  }
+
+  async reportsCsv(adminId: string) {
+    const r = await this.reports();
+    await this.log(adminId, "reports.export");
+    return csv(
+      ["section", "label", "count", "extra"],
+      [
+        ...r.weekly.map((w) => ["signups_by_week", w.week, w.total, ""]),
+        ...r.verifiedWeekly.map((w) => [
+          "verified_by_week",
+          w.week,
+          w.total,
+          "",
+        ]),
+        ...r.funnel.map((f) => ["funnel", f.step, f.total, ""]),
+        ...r.usage.map((u) => [
+          "product_usage",
+          u.type,
+          u.total,
+          `${u.users} users; $${(u.usdCents / 100).toFixed(2)} simulated`,
+        ]),
+        ["waitlist", "total", r.waitlist.total, ""],
+        ["waitlist", "created an account", r.waitlist.joined, ""],
+      ],
+    );
+  }
+
+  /* ---------- system status ---------- */
+
+  async status() {
+    const started = performance.now();
+    let database: { ok: boolean; latencyMs: number; error?: string };
+    try {
+      await this.db.execute(sql`select 1`);
+      database = {
+        ok: true,
+        latencyMs: Math.round(performance.now() - started),
+      };
+    } catch {
+      database = {
+        ok: false,
+        latencyMs: Math.round(performance.now() - started),
+        error: "Database did not respond.",
+      };
+    }
+    const memory = process.memoryUsage();
+    return {
+      checkedAt: new Date().toISOString(),
+      api: {
+        ok: true,
+        uptimeSeconds: Math.round(process.uptime()),
+        node: process.version,
+        environment: this.config.NODE_ENV,
+        memoryMb: Math.round(memory.rss / 1_048_576),
+      },
+      database,
+      email: {
+        ok: Boolean(this.config.RESEND_API_KEY && this.config.EMAIL_FROM),
+        provider: "Resend",
+      },
+      driver: this.config.DATABASE_DRIVER,
+    };
+  }
+
+  /* ---------- global search ---------- */
+
+  async search(raw?: string) {
+    const q = term(raw);
+    if (!q || q.length < 2) return { users: [], transactions: [], tickets: [] };
+    const pattern = like(q);
+    const number = /^#?t?-?(\d{1,9})$/i.exec(q)?.[1];
+    const [found, tx, tickets] = await Promise.all([
+      this.db
+        .select({ id: users.id, fullName: users.fullName, email: users.email })
+        .from(users)
+        .where(or(ilike(users.email, pattern), ilike(users.fullName, pattern)))
+        .orderBy(desc(users.createdAt))
+        .limit(5),
+      this.db
+        .select({
+          id: demoLedger.id,
+          description: demoLedger.description,
+          reference: demoLedger.reference,
+          usdCents: demoLedger.usdCents,
+          userId: demoLedger.userId,
+          email: users.email,
+        })
+        .from(demoLedger)
+        .innerJoin(users, eq(users.id, demoLedger.userId))
+        .where(
+          or(
+            ilike(demoLedger.reference, pattern),
+            ilike(demoLedger.description, pattern),
+          ),
+        )
+        .orderBy(desc(demoLedger.createdAt))
+        .limit(5),
+      this.db
+        .select({
+          id: supportTickets.id,
+          number: supportTickets.number,
+          subject: supportTickets.subject,
+          status: supportTickets.status,
+        })
+        .from(supportTickets)
+        .where(
+          number
+            ? or(
+                eq(supportTickets.number, Number(number)),
+                ilike(supportTickets.subject, pattern),
+              )
+            : ilike(supportTickets.subject, pattern),
+        )
+        .orderBy(desc(supportTickets.createdAt))
+        .limit(5),
+    ]);
+    return { users: found, transactions: tx, tickets };
+  }
 }
 
 @ApiTags("Admin")
@@ -754,6 +1268,7 @@ export class AdminController {
   }
 
   @Post("users/:id/suspend")
+  @Allow("compliance")
   @HttpCode(200)
   suspend(
     @Req() req: AdminRequest,
@@ -764,18 +1279,21 @@ export class AdminController {
   }
 
   @Post("users/:id/unsuspend")
+  @Allow("compliance")
   @HttpCode(200)
   unsuspend(@Req() req: AdminRequest, @Param("id", ParseUUIDPipe) id: string) {
     return this.admin.unsuspend(req.userId, id);
   }
 
   @Post("users/:id/sign-out")
+  @Allow("support")
   @HttpCode(200)
   signOut(@Req() req: AdminRequest, @Param("id", ParseUUIDPipe) id: string) {
     return this.admin.signOut(req.userId, id);
   }
 
   @Post("users/:id/password-reset")
+  @Allow("support")
   @HttpCode(200)
   @ApiOperation({ summary: "Email the account a password reset link" })
   passwordReset(
@@ -794,6 +1312,7 @@ export class AdminController {
   }
 
   @Post("verifications/:userId/:kind")
+  @Allow("compliance")
   @HttpCode(200)
   @ApiOperation({
     summary: "Approve, request information on, or reject a case in review",
@@ -819,6 +1338,7 @@ export class AdminController {
   }
 
   @Get("transactions.csv")
+  @Allow()
   @Header("Content-Type", "text/csv; charset=utf-8")
   @Header("Content-Disposition", 'attachment; filename="transactions.csv"')
   @Header("Cache-Control", "no-store")
@@ -842,6 +1362,7 @@ export class AdminController {
   }
 
   @Post("tickets/:id/status")
+  @Allow("support")
   @HttpCode(200)
   setTicketStatus(
     @Req() req: AdminRequest,
@@ -857,6 +1378,7 @@ export class AdminController {
   }
 
   @Get("waitlist.csv")
+  @Allow()
   @Header("Content-Type", "text/csv; charset=utf-8")
   @Header("Content-Disposition", 'attachment; filename="waitlist.csv"')
   @Header("Cache-Control", "no-store")
@@ -868,5 +1390,122 @@ export class AdminController {
   @ApiOperation({ summary: "Admin activity log, newest first" })
   audit(@Query("page") page?: string) {
     return this.admin.audit({ page });
+  }
+
+  @Get("me")
+  @ApiOperation({ summary: "The signed-in admin's role" })
+  me(@Req() req: AdminRequest) {
+    return { role: req.adminRole };
+  }
+
+  @Get("tickets/:id")
+  ticket(@Param("id", ParseUUIDPipe) id: string) {
+    return this.admin.ticket(id);
+  }
+
+  @Post("tickets/:id/reply")
+  @HttpCode(200)
+  @Allow("support")
+  @ApiOperation({ summary: "Reply to a ticket; the customer sees it" })
+  reply(
+    @Req() req: AdminRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.admin.reply(req.userId, id, body);
+  }
+
+  @Get("users/:id/notes")
+  notes(@Param("id", ParseUUIDPipe) id: string) {
+    return this.admin.notes(id);
+  }
+
+  @Post("users/:id/notes")
+  @HttpCode(200)
+  @Allow("compliance", "support")
+  addNote(
+    @Req() req: AdminRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.admin.addNote(req.userId, id, body);
+  }
+
+  @Get("announcements")
+  announcements() {
+    return this.admin.listAnnouncements();
+  }
+
+  @Post("announcements")
+  @HttpCode(200)
+  createAnnouncement(@Req() req: AdminRequest, @Body() body: unknown) {
+    return this.admin.createAnnouncement(req.userId, body);
+  }
+
+  @Post("announcements/:id")
+  @HttpCode(200)
+  setAnnouncement(
+    @Req() req: AdminRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.admin.setAnnouncement(req.userId, id, body);
+  }
+
+  @Get("team")
+  team() {
+    return this.admin.team();
+  }
+
+  @Post("team")
+  @HttpCode(200)
+  @ApiOperation({ summary: "Make an existing account an admin (owner only)" })
+  addAdmin(@Req() req: AdminRequest, @Body() body: unknown) {
+    return this.admin.addAdmin(req.userId, body);
+  }
+
+  @Post("team/:id/role")
+  @HttpCode(200)
+  setRole(
+    @Req() req: AdminRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.admin.setRole(req.userId, id, body);
+  }
+
+  @Post("team/:id/remove")
+  @HttpCode(200)
+  removeAdmin(
+    @Req() req: AdminRequest,
+    @Param("id", ParseUUIDPipe) id: string,
+  ) {
+    return this.admin.removeAdmin(req.userId, id);
+  }
+
+  @Get("reports")
+  reports() {
+    return this.admin.reports();
+  }
+
+  @Get("reports.csv")
+  @Allow()
+  @Header("Content-Type", "text/csv; charset=utf-8")
+  @Header("Content-Disposition", 'attachment; filename="report.csv"')
+  @Header("Cache-Control", "no-store")
+  reportsCsv(@Req() req: AdminRequest) {
+    return this.admin.reportsCsv(req.userId);
+  }
+
+  @Get("status")
+  @ApiOperation({ summary: "API, database and email health" })
+  status() {
+    return this.admin.status();
+  }
+
+  @Get("search")
+  @ApiOperation({ summary: "Find users, transactions and tickets" })
+  search(@Query("q") q?: string) {
+    return this.admin.search(q);
   }
 }

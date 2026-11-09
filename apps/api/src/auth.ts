@@ -101,6 +101,7 @@ const publicUser = (user: typeof users.$inferSelect) => ({
   emailVerifiedAt: user.emailVerifiedAt,
   provisionedAt: user.provisionedAt,
   isAdmin: user.isAdmin,
+  adminRole: user.isAdmin ? (user.adminRole ?? "owner") : null,
 });
 type AuthenticatedRequest = Request & { userId: string; sessionId: string };
 

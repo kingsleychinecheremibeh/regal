@@ -75,7 +75,7 @@ export async function grantAdmin(databaseUrl: string, email: string) {
   try {
     const updated = await drizzle(client)
       .update(users)
-      .set({ isAdmin: true })
+      .set({ isAdmin: true, adminRole: "owner" })
       .where(eq(users.email, emailSchema.parse(email.trim().toLowerCase())))
       .returning({ id: users.id });
     if (!updated.length) throw new Error("No account uses that email");

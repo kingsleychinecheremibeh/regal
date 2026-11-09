@@ -35,6 +35,8 @@ import {
   demoPaymentLinks,
   demoWatchlist,
   supportTickets,
+  ticketMessages,
+  announcements,
   users,
   verificationCases,
 } from "../db/schema";
@@ -659,6 +661,66 @@ ${s.lines.map((l) => `<tr><td>${l.date}</td><td>${escapeHtml(l.reference)}</td><
       .orderBy(desc(supportTickets.createdAt));
   }
 
+  async ticket(userId: string, id: string) {
+    const [ticket] = await this.db
+      .select()
+      .from(supportTickets)
+      .where(and(eq(supportTickets.id, id), eq(supportTickets.userId, userId)))
+      .limit(1);
+    if (!ticket) throw new NotFoundException("Ticket not found.");
+    const messages = await this.db
+      .select({
+        id: ticketMessages.id,
+        body: ticketMessages.body,
+        fromStaff: ticketMessages.fromStaff,
+        createdAt: ticketMessages.createdAt,
+      })
+      .from(ticketMessages)
+      .where(eq(ticketMessages.ticketId, id))
+      .orderBy(ticketMessages.createdAt);
+    return { ticket, messages };
+  }
+
+  async replyTicket(userId: string, id: string, body: unknown) {
+    const input = parse(
+      z.strictObject({
+        body: z.string().trim().min(2, "Write a message.").max(4000),
+      }),
+      body,
+    );
+    const [ticket] = await this.db
+      .select({ id: supportTickets.id })
+      .from(supportTickets)
+      .where(and(eq(supportTickets.id, id), eq(supportTickets.userId, userId)))
+      .limit(1);
+    if (!ticket) throw new NotFoundException("Ticket not found.");
+    await this.db.transaction(async (tx) => {
+      await tx
+        .insert(ticketMessages)
+        .values({ ticketId: id, authorId: userId, body: input.body });
+      await tx
+        .update(supportTickets)
+        .set({ status: "open" })
+        .where(eq(supportTickets.id, id));
+    });
+    return { message: "Message sent." };
+  }
+
+  activeAnnouncements() {
+    return this.db
+      .select({
+        id: announcements.id,
+        title: announcements.title,
+        body: announcements.body,
+        tone: announcements.tone,
+        createdAt: announcements.createdAt,
+      })
+      .from(announcements)
+      .where(eq(announcements.active, true))
+      .orderBy(desc(announcements.createdAt))
+      .limit(3);
+  }
+
   async createTicket(userId: string, body: unknown) {
     const input = parse(
       z.strictObject({
@@ -679,7 +741,7 @@ ${s.lines.map((l) => `<tr><td>${l.date}</td><td>${escapeHtml(l.reference)}</td><
       this.db,
       userId,
       "Account",
-      `Ticket T-${rows[0].number} received. Demo tickets are not monitored by staff.`,
+      `Ticket T-${rows[0].number} received. Our team will reply here.`,
     );
     return rows[0];
   }
