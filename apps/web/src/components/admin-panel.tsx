@@ -5,7 +5,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import { dateTime, label, money } from "@/lib/format";
 import { Logo } from "@/components/logo";
-import { Badge, Kpi, Seg, Table } from "@/components/dashboard/ui";
+import { Badge, Kpi, Table } from "@/components/dashboard/ui";
 
 type Overview = {
   users: number;
@@ -245,57 +245,93 @@ function Messages() {
 
 export function AdminPanel() {
   const [tab, setTab] = useState<Tab>("overview");
+  const [open, setOpen] = useState(false);
   const overview = useList<Overview>("admin/overview");
   const o = overview.data;
+  const waiting = o?.verification.in_review ?? 0;
+  const title = TABS.find(([key]) => key === tab)?.[1] ?? "";
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-      <header className="site">
-        <div className="wrap">
+    <div className={`shell${open ? " mo" : ""}`}>
+      <aside className="side" aria-label="Admin">
+        <div className="logo">
           <Logo />
-          <b style={{ color: "#fff" }}>Admin</b>
-          <Link
-            className="btn btn-w btn-sm"
-            href="/dashboard"
-            style={{ justifySelf: "end" }}
-          >
-            My dashboard
-          </Link>
         </div>
-      </header>
-      <main className="wrap" id="main" style={{ padding: "28px 20px" }}>
-        <h1>Operations</h1>
-        <div className="mb" style={{ overflowX: "auto" }}>
-          <Seg items={TABS} value={tab} onChange={setTab} label="Admin" />
+        <div className="xs" style={{ padding: "0 12px 10px", opacity: 0.7 }}>
+          ADMIN CONSOLE
         </div>
-        {tab === "overview" &&
-          (o ? (
-            <div className="grid g4">
-              <Kpi
-                title="Users"
-                value={o.users}
-                sub={`${o.usersLastWeek} joined in the last 7 days`}
-              />
-              <Kpi
-                title="Waiting for review"
-                value={o.verification.in_review ?? 0}
-                sub={`${o.verification.verified ?? 0} verified`}
-              />
-              <Kpi title="Transactions" value={o.transactions} />
-              <Kpi
-                title="Waitlist and messages"
-                value={o.waitlist + o.messages}
-                sub={`${o.waitlist} waitlist · ${o.messages} messages`}
-              />
-            </div>
-          ) : (
-            <p className="mut">{overview.error || "Loading…"}</p>
+        <nav>
+          {TABS.map(([key, name]) => (
+            <a
+              key={key}
+              href={`#${key}`}
+              aria-current={tab === key ? "page" : undefined}
+              onClick={(e) => {
+                e.preventDefault();
+                setTab(key);
+                setOpen(false);
+              }}
+            >
+              <span className="lb">{name}</span>
+              {key === "verifications" && waiting > 0 && (
+                <span style={{ marginLeft: "auto" }}>
+                  <Badge tone="b-warn" text={String(waiting)} />
+                </span>
+              )}
+            </a>
           ))}
-        {tab === "verifications" && <Queue onChange={overview.reload} />}
-        {tab === "users" && <Users />}
-        {tab === "transactions" && <Transactions />}
-        {tab === "messages" && <Messages />}
-      </main>
+          <hr style={{ opacity: 0.15, margin: "10px 0" }} />
+          <Link href="/dashboard">
+            <span className="lb">My dashboard</span>
+          </Link>
+        </nav>
+      </aside>
+      <div className="scrim" onClick={() => setOpen(false)} />
+      <div>
+        <div className="top">
+          <button
+            className="btn btn-s btn-sm mnav"
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+          >
+            Menu
+          </button>
+          <b>{title}</b>
+          <span style={{ marginLeft: "auto" }}>
+            <Badge tone="b-ok" text="Admin" />
+          </span>
+        </div>
+        <main className="main" id="main">
+          <h1>{title}</h1>
+          {tab === "overview" &&
+            (o ? (
+              <div className="grid g4">
+                <Kpi
+                  title="Users"
+                  value={o.users}
+                  sub={`${o.usersLastWeek} joined in the last 7 days`}
+                />
+                <Kpi
+                  title="Waiting for review"
+                  value={waiting}
+                  sub={`${o.verification.verified ?? 0} verified`}
+                />
+                <Kpi title="Transactions" value={o.transactions} />
+                <Kpi
+                  title="Waitlist and messages"
+                  value={o.waitlist + o.messages}
+                  sub={`${o.waitlist} waitlist · ${o.messages} messages`}
+                />
+              </div>
+            ) : (
+              <p className="mut">{overview.error || "Loading…"}</p>
+            ))}
+          {tab === "verifications" && <Queue onChange={overview.reload} />}
+          {tab === "users" && <Users />}
+          {tab === "transactions" && <Transactions />}
+          {tab === "messages" && <Messages />}
+        </main>
+      </div>
     </div>
   );
 }
