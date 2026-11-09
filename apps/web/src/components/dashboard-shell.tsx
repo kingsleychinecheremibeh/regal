@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, Eye, EyeOff, Menu, PanelLeft } from "lucide-react";
+import { Bell, Eye, EyeOff, Menu, PanelLeft, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { api } from "@/lib/api";
 import { label } from "@/lib/format";
@@ -53,7 +53,13 @@ function Bellmenu({ open }: { open: boolean }) {
   );
 }
 
-function Frame({ children }: { children: React.ReactNode }) {
+function Frame({
+  children,
+  isAdmin,
+}: {
+  children: React.ReactNode;
+  isAdmin: boolean;
+}) {
   const path = usePathname();
   const router = useRouter();
   const { state, hide, setHide } = useDash();
@@ -184,6 +190,12 @@ function Frame({ children }: { children: React.ReactNode }) {
           >
             {hide ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
+          {isAdmin && (
+            <Link className="btn btn-p btn-sm" href="/admin">
+              <ShieldCheck size={16} aria-hidden="true" />
+              <span className="hide-m">Admin console</span>
+            </Link>
+          )}
           <div className="menu">
             <button
               className="btn btn-s btn-sm"
@@ -222,6 +234,11 @@ function Frame({ children }: { children: React.ReactNode }) {
                   />
                 </div>
                 <div className="row mt">
+                  {isAdmin && (
+                    <Link className="btn btn-p btn-sm" href="/admin">
+                      Admin console
+                    </Link>
+                  )}
                   <Link className="btn btn-s btn-sm" href="/dashboard/settings">
                     Settings
                   </Link>
@@ -270,10 +287,16 @@ function Announcements() {
   );
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  isAdmin = false,
+}: {
+  children: React.ReactNode;
+  isAdmin?: boolean;
+}) {
   return (
     <DashboardProvider>
-      <Frame>{children}</Frame>
+      <Frame isAdmin={isAdmin}>{children}</Frame>
     </DashboardProvider>
   );
 }

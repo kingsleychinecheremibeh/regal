@@ -13,7 +13,12 @@ export default async function DashboardLayout({
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:4000"
   ).replace(/\/$/, "");
-  let user: { id: string; fullName: string; email: string } | null = null;
+  let user: {
+    id: string;
+    fullName: string;
+    email: string;
+    isAdmin?: boolean;
+  } | null = null;
   try {
     const response = await fetch(`${api}/api/v1/auth/me`, {
       headers: { cookie },
@@ -24,5 +29,7 @@ export default async function DashboardLayout({
     /* A failed API lookup must never open the dashboard. */
   }
   if (!user) redirect("/sign-in?next=/dashboard");
-  return <DashboardShell>{children}</DashboardShell>;
+  return (
+    <DashboardShell isAdmin={Boolean(user.isAdmin)}>{children}</DashboardShell>
+  );
 }
