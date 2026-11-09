@@ -31,6 +31,7 @@ export const users = pgTable("users", {
   emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
   provisionedAt: timestamp("provisioned_at", { withTimezone: true }),
   isAdmin: boolean("is_admin").notNull().default(false),
+  suspendedAt: timestamp("suspended_at", { withTimezone: true }),
   termsAcceptedAt: timestamp("terms_accepted_at", {
     withTimezone: true,
   }).notNull(),
@@ -343,3 +344,21 @@ export const contactMessages = pgTable("contact_messages", {
   message: text("message").notNull(),
   createdAt: created(),
 });
+
+/** Every action taken in the admin console, newest first. */
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    adminId: uuid("admin_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    action: varchar("action", { length: 48 }).notNull(),
+    targetUserId: uuid("target_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    detail: varchar("detail", { length: 240 }),
+    createdAt: created(),
+  },
+  (table) => [index("admin_audit_log_created").on(table.createdAt)],
+);

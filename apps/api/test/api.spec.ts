@@ -408,9 +408,7 @@ integration("Regalvest API with isolated PostgreSQL", () => {
       (await call("POST", "demo/verification/kyc/submit", cookie)).status,
     ).toBe(200);
     // Only admins decide cases; the customer cannot approve their own.
-    expect((await call("GET", "admin/verifications", cookie)).status).toBe(
-      403,
-    );
+    expect((await call("GET", "admin/verifications", cookie)).status).toBe(403);
     const [account] = await drizzle(sql)
       .update(users)
       .set({ isAdmin: true })
@@ -579,6 +577,103 @@ integration("Regalvest API with isolated PostgreSQL", () => {
     expect((await call("POST", "demo/reset", cookie, {})).status).toBe(200);
     expect((await holdings(cookie)).USD).toBe(12480.55);
     expect((await call("GET", "demo/transactions", cookie)).body.total).toBe(7);
+
+    // Admin console: overview, search, detail, exports, moderation, audit.
+    const overview = await call("GET", "admin/overview", cookie);
+    expect(overview.status).toBe(200);
+    expect(overview.body).toMatchObject({
+      users: { total: expect.any(Number), admins: expect.any(Number) },
+      transactions: { total: expect.any(Number) },
+      verification: { kyc: expect.any(Object) },
+    });
+    expect(Array.isArray(overview.body.signups)).toBe(true);
+    const found = await call(
+      "GET",
+      `admin/users?search=${encodeURIComponent(otherEmail)}`,
+      cookie,
+    );
+    expect(found.body.total).toBe(1);
+    const otherId = found.body.rows[0].id as string;
+    const admins = await call("GET", "admin/users?filter=admins", cookie);
+    expect(
+      admins.body.rows.some((u: { email: string }) => u.email === accountEmail),
+    ).toBe(true);
+    const detail = await call("GET", `admin/users/${account.id}`, cookie);
+    expect(detail.status).toBe(200);
+    expect(detail.body.verification).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "kyc", status: "verified" }),
+      ]),
+    );
+    expect(detail.body.ledger.length).toBeGreaterThan(0);
+    expect((await call("GET", "admin/users/not-a-uuid", cookie)).status).toBe(
+      400,
+    );
+    const ledger = await call(
+      "GET",
+      `admin/transactions?search=${encodeURIComponent(accountEmail)}`,
+      cookie,
+    );
+    expect(ledger.body.total).toBeGreaterThan(0);
+    const exported = await call("GET", "admin/transactions.csv", cookie);
+    expect(exported.status).toBe(200);
+    expect(String(exported.text).split("\n")[0]).toBe(
+      "date,email,type,status,description,reference,currency,usd",
+    );
+    expect(
+      (await call("POST", `admin/users/${account.id}/suspend`, cookie, {}))
+        .status,
+    ).toBe(400);
+    expect(
+      (
+        await fetch(`${baseUrl}/api/v1/admin/users/${otherId}/suspend`, {
+          method: "POST",
+          headers: { Cookie: cookie, Origin: "https://evil.example" },
+        })
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await call("POST", `admin/users/${otherId}/suspend`, cookie, {
+          reason: "Test",
+        })
+      ).status,
+    ).toBe(200);
+    expect((await call("GET", "auth/me", otherCookie)).status).toBe(401);
+    expect(
+      (await call("GET", "admin/users?filter=suspended", cookie)).body.total,
+    ).toBeGreaterThanOrEqual(1);
+    expect(
+      (await call("POST", `admin/users/${otherId}/unsuspend`, cookie, {}))
+        .status,
+    ).toBe(200);
+    expect(
+      (await call("POST", `admin/users/${otherId}/sign-out`, cookie, {}))
+        .status,
+    ).toBe(200);
+    expect((await call("GET", "admin/tickets", cookie)).status).toBe(200);
+    expect(
+      (
+        await call(
+          "POST",
+          "admin/tickets/00000000-0000-4000-8000-000000000000/status",
+          cookie,
+          { status: "resolved" },
+        )
+      ).status,
+    ).toBe(404);
+    expect((await call("GET", "admin/messages", cookie)).status).toBe(200);
+    expect((await call("GET", "admin/waitlist", cookie)).status).toBe(200);
+    const audit = await call("GET", "admin/audit", cookie);
+    expect(audit.body.rows.map((r: { action: string }) => r.action)).toEqual(
+      expect.arrayContaining([
+        "verification.verified",
+        "user.suspend",
+        "user.unsuspend",
+        "user.sign_out_all",
+        "transactions.export",
+      ]),
+    );
 
     expect(
       (await post("auth/forgot-password", { email: accountEmail })).status,

@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ThrottlerModule } from "@nestjs/throttler";
-import { AdminController, AdminGuard } from "./admin";
+import { AdminController, AdminGuard, AdminService } from "./admin";
 import { AppController } from "./app.controller";
 import { readConfig } from "./config";
 import { CONFIG, Database } from "./db/database";
@@ -32,6 +32,7 @@ import { RecordsService } from "./demo/records";
     AuthService,
     SessionGuard,
     AdminGuard,
+    AdminService,
     DemoCore,
     MoneyService,
     RecordsService,

@@ -100,6 +100,7 @@ const publicUser = (user: typeof users.$inferSelect) => ({
   fullName: user.fullName,
   emailVerifiedAt: user.emailVerifiedAt,
   provisionedAt: user.provisionedAt,
+  isAdmin: user.isAdmin,
 });
 type AuthenticatedRequest = Request & { userId: string; sessionId: string };
 
@@ -328,6 +329,8 @@ export class AuthService {
     const user = rows[0];
     if (!user || !(await verifyPassword(user.passwordHash, input.password)))
       throw new UnauthorizedException("Invalid email or password");
+    if (user.suspendedAt)
+      throw new ForbiddenException("This account has been suspended.");
     if (!user.emailVerifiedAt && !user.provisionedAt)
       throw new ForbiddenException("Verify your email before signing in");
     const rawToken = token();
@@ -355,14 +358,20 @@ export class AuthService {
       .find((part) => part.startsWith(`${cookieName}=`))
       ?.slice(cookieName.length + 1);
     if (!rawToken) throw new UnauthorizedException();
+    // Sessions of suspended accounts stop working immediately.
     const rows = await this.database.db
-      .select()
+      .select({
+        id: authenticationSessions.id,
+        userId: authenticationSessions.userId,
+      })
       .from(authenticationSessions)
+      .innerJoin(users, eq(users.id, authenticationSessions.userId))
       .where(
         and(
           eq(authenticationSessions.tokenHash, digest(rawToken)),
           isNull(authenticationSessions.revokedAt),
           gt(authenticationSessions.expiresAt, new Date()),
+          isNull(users.suspendedAt),
         ),
       )
       .limit(1);
