@@ -319,7 +319,7 @@ export const pages: Record<string, SitePage> = {
       ],
       [
         "Where we are today",
-        "This is an investor preview. Accounts and sign-in are real. Balances, prices, payments and verification are simulated, and no regulated service is offered yet.",
+        "We are preparing for launch. Accounts, sign-in and every product screen are ready to explore today. Money services go live with our licensed banking and payment partners at launch.",
       ],
     ],
     steps: [],
@@ -381,7 +381,7 @@ export const pages: Record<string, SitePage> = {
   contact: {
     title: "Contact us",
     icon: "globe",
-    lead: "Questions about the platform, the investor preview or a partnership? Send us a message and we will reply by email. Please do not send personal financial information.",
+    lead: "Questions about the platform or a partnership? Send us a message and we will reply by email. Please do not send personal financial information.",
     features: [],
     steps: [],
     form: "Send a message",
@@ -594,7 +594,7 @@ export const faq: [string, string][] = [
   ],
   [
     "Is this live? Can I move real money?",
-    "No. This is an investor preview. Your account and sign-in are real, but every balance, price, payment and verification decision is simulated.",
+    "Not yet. Your account and sign-in are real and you can explore every product today, but balances shown before launch are not real funds. Money services go live with our licensed partners at launch.",
   ],
   [
     "How do I create an account?",

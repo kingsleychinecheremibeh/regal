@@ -15,11 +15,11 @@ import { glossary, pages } from "@/lib/site-content";
 const modes = {
   "sign-up": {
     title: "Create your account",
-    note: "Your account is real. Everything financial inside is a simulation.",
+    note: "Open your account in minutes. One login for trading, payments, cards and more.",
   },
   "sign-in": {
     title: "Sign in",
-    note: "Welcome back to your TurboXGlobal preview.",
+    note: "Welcome back to TurboXGlobal.",
   },
   "forgot-password": {
     title: "Reset your password",

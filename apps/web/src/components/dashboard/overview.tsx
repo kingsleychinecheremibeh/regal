@@ -143,7 +143,7 @@ export function Overview() {
           title="Total portfolio value"
           value={mask(money(data.totalUsd))}
           sub={
-            data.holdings.length ? "At illustrative prices" : "No holdings yet"
+            data.holdings.length ? "At indicative prices" : "No holdings yet"
           }
         />
         {(["USD", "EUR", "GBP"] as const).map((c) => (

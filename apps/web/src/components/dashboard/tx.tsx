@@ -36,7 +36,7 @@ export function TxDetails({ tx, onClose }: { tx: Tx; onClose: () => void }) {
       {Object.entries(tx.meta).map(([key, value]) =>
         line(META_LABEL[key] ?? key, value),
       )}
-      {line("Simulated provider reference", <code>{tx.providerRef}</code>)}
+      {line("Provider reference", <code>{tx.providerRef}</code>)}
       {line("Status", <Badge status={tx.status} />)}
       {tx.reason && (
         <div className="notice err mt">

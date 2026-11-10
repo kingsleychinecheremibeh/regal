@@ -464,7 +464,7 @@ export class RecordsService {
         .map(csvCell)
         .join(",");
     return [
-      "# TurboXGlobal investor preview. Simulated data with no monetary value.",
+      "# TurboXGlobal. Balances before launch are not real funds.",
       header.join(","),
       ...rows.map(line),
     ].join("\n");
@@ -557,7 +557,7 @@ export class RecordsService {
     const name = `turboxglobal-statement-${input.period}-${input.account}.${input.format}`;
     if (input.format === "csv") {
       const body = [
-        "# TurboXGlobal investor preview statement. Simulated data with no monetary value.",
+        "# TurboXGlobal statement. Balances before launch are not real funds.",
         "Currency,Date,Reference,Description,Amount,Balance,Status",
         ...sections.flatMap((s) => [
           [
@@ -596,7 +596,7 @@ export class RecordsService {
         value,
       );
     const body = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Statement ${input.period}</title><style>body{font:14px/1.5 system-ui,sans-serif;color:#0b1533;max-width:860px;margin:32px auto;padding:0 16px}h1{font-size:22px}table{border-collapse:collapse;width:100%;margin:12px 0 28px}th,td{padding:7px 10px;border-bottom:1px solid #e1e5ee;text-align:left}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}.demo{background:#fbf1dc;border-left:4px solid #e8b547;padding:10px 14px;border-radius:6px}@media print{.noprint{display:none}}</style></head><body>
-<p class="demo"><b>Investor preview.</b> This statement shows simulated data with no monetary value. It is not a bank statement.</p>
+<p class="demo"><b>Pre-launch statement.</b> Balances before launch are not real funds. It is not a bank statement.</p>
 <h1>TurboXGlobal statement · ${escapeHtml(input.period)}</h1><p>Account holder: ${escapeHtml(user[0]?.fullName ?? "")}<br>Accounts: ${escapeHtml(input.account === "ALL" ? "All currencies" : input.account)}</p>
 <p class="noprint"><button onclick="print()">Print or save as PDF</button></p>
 ${sections
@@ -1091,6 +1091,6 @@ ${s.lines.map((l) => `<tr><td>${l.date}</td><td>${escapeHtml(l.reference)}</td><
         }
       }
     });
-    return { message: "Demo data reset" };
+    return { message: "Account data reset" };
   }
 }

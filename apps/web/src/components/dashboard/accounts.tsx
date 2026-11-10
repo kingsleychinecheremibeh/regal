@@ -248,7 +248,7 @@ export function Accounts() {
               ["Outgoing transfers", "0.4%, minimum 1.00"],
               ["Conversion", "0.3%"],
               ["Single transfer or withdrawal", "5,000 USD"],
-              ["Demo deposit", "Up to 50,000 USD each"],
+              ["Deposit", "Up to 50,000 USD each"],
             ]}
           />
           <h3 className="mt">Transfer instructions</h3>
@@ -319,7 +319,9 @@ export function Accounts() {
             <span>Fee (0.3%)</span>
             <b>{money(quote.feeUnits / 1e8, quote.to)}</b>
           </div>
-          <p className="xs mut mt">Illustrative fixed rates. No money moves.</p>
+          <p className="xs mut mt">
+            Rates are indicative and confirmed when you convert.
+          </p>
         </Modal>
       )}
     </>

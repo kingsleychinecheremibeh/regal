@@ -420,8 +420,7 @@ export function Pay() {
             </div>
           )}
           <p className="xs mut mt">
-            Idempotency key <code>{key}</code>. Simulated payment: no money
-            moves.
+            Reference key <code>{key}</code>. Keep it if you contact support.
           </p>
         </Modal>
       )}

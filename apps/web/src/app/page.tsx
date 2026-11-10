@@ -130,9 +130,9 @@ export default function HomePage() {
             <div>
               <h1>Everything You Need to Build Wealth</h1>
               <p className="lead">
-                Trade digital assets, send money across borders, hold USD, EUR
-                and GBP, spend with virtual cards and explore investments, all
-                in one account.
+                One account to trade digital assets, send money across borders,
+                hold USD, EUR and GBP, spend with virtual cards and grow your
+                wealth. Built for Africans at home and abroad.
               </p>
               <div className="row">
                 <Link className="btn btn-p btn-lg" href="/sign-up">
@@ -150,11 +150,9 @@ export default function HomePage() {
         <div className="pitch">
           <div className="wrap">
             <div className="grid g3">
-              <p>
-                One account for trading, payments, currencies and investing.
-              </p>
-              <p>Fees and rates shown before you confirm.</p>
-              <p>Every product built around a simple, clear flow.</p>
+              <p>One login for trading, payments, currencies and investing.</p>
+              <p>Every fee and exchange rate shown before you confirm.</p>
+              <p>Clear, guided flows. No jargon, no surprises.</p>
             </div>
           </div>
         </div>
@@ -162,10 +160,60 @@ export default function HomePage() {
         <section className="s">
           <div className="wrap">
             <div className="sh">
-              <h2>Everything you need to trade digital assets</h2>
+              <h2>All things are possible</h2>
               <p>
-                Buy, sell and swap supported digital assets at clear prices,
-                with every fee shown before you confirm.
+                Money that moves the way your life does, across networks,
+                countries and currencies.
+              </p>
+            </div>
+            <div className="grid g3">
+              <Tile
+                slug="bills"
+                icon="pay"
+                title="Airtime and data, any network"
+                text="Top up airtime or data for any network, in any country, from one app."
+              />
+              <Tile
+                slug="bills"
+                icon="home"
+                title="Pay bills across borders"
+                text="Your child abroad needs electricity in a hurry? Sort it out from wherever you are."
+              />
+              <Tile
+                slug="transfers"
+                icon="globe"
+                title="Pay suppliers in real time"
+                text="Pay suppliers in China and beyond without the usual wait."
+              />
+              <Tile
+                slug="global-accounts"
+                icon="wealth"
+                title="Multi-currency accounts"
+                text="The oga kpata kpata: hold balances in different currencies, all in one place."
+              />
+              <Tile
+                slug="virtual-cards"
+                icon="card"
+                title="USD virtual cards, low fees"
+                text="A dollar card for online shopping and subscriptions, without the high fees."
+              />
+              <Tile
+                slug="convert"
+                icon="swap"
+                title="Convert in seconds"
+                text="Move between currencies at a rate you see before you confirm."
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="s">
+          <div className="wrap">
+            <div className="sh">
+              <h2>Trade digital assets with confidence</h2>
+              <p>
+                Buy, sell and swap leading digital assets in seconds. You see
+                the price and every fee before you commit.
               </p>
             </div>
             <div className="grid g3">
@@ -173,19 +221,19 @@ export default function HomePage() {
                 slug="buy-sell"
                 icon="trade"
                 title="Buy & Sell"
-                text="Trade supported assets with market or limit orders."
+                text="Market and limit orders on leading assets like BTC, ETH and USDT."
               />
               <Tile
                 slug="swap"
                 icon="swap"
                 title="Swap Coins"
-                text="Exchange one asset for another in one step."
+                text="Swap one asset for another in a single step."
               />
               <Tile
                 slug="markets"
                 icon="chart"
                 title="Market Overview"
-                text="Charts, watchlists and quick access to trading."
+                text="Live charts, watchlists and one-tap trading."
               />
             </div>
             <div className="mt2">
@@ -199,11 +247,10 @@ export default function HomePage() {
         <section className="s alt">
           <div className="wrap">
             <div className="sh">
-              <h2>Do more with your money with TurboXPay</h2>
+              <h2>Move money without borders with TurboXPay</h2>
               <p>
-                Send, pay and convert from one balance. See the fee and the
-                exchange rate before you confirm, and keep a receipt for
-                everything.
+                Send, pay and convert from one balance. The fee and exchange
+                rate are always upfront, and every payment comes with a receipt.
               </p>
             </div>
             <div className="grid g3">
@@ -211,37 +258,37 @@ export default function HomePage() {
                 slug="turboxpay"
                 icon="pay"
                 title="TurboXPay"
-                text="Pay beneficiaries and keep receipts."
+                text="Pay family, friends and suppliers from one balance."
               />
               <Tile
                 slug="bills"
                 icon="pay"
                 title="Bills & Utilities"
-                text="Pay your bills from your balance."
+                text="Electricity, airtime and data for any network, anywhere."
               />
               <Tile
                 slug="transfers"
                 icon="globe"
                 title="International Transfers"
-                text="Send money abroad with costs shown first."
+                text="Send money abroad with the full cost shown first."
               />
               <Tile
                 slug="convert"
                 icon="swap"
                 title="Currency Conversion"
-                text="Move between USD, EUR and GBP."
+                text="Switch between USD, EUR and GBP at a clear rate."
               />
               <Tile
                 slug="merchant"
                 icon="store"
                 title="Merchant Payments"
-                text="Accept payments for your business."
+                text="Get paid by customers through links and checkout."
               />
               <Tile
                 slug="global-accounts"
                 icon="globe"
                 title="Global Accounts"
-                text="Hold USD, EUR and GBP together."
+                text="Hold USD, EUR and GBP side by side."
               />
             </div>
           </div>
@@ -252,8 +299,8 @@ export default function HomePage() {
             <div className="sh">
               <h2>Invest in what you believe in</h2>
               <p>
-                Explore stocks, ETFs and real estate, with the details and risks
-                explained before you invest.
+                Explore stocks, ETFs and real estate, with the details and the
+                risks laid out plainly before you invest.
               </p>
             </div>
             <div className="grid g3">
@@ -261,19 +308,19 @@ export default function HomePage() {
                 slug="stocks-etfs"
                 icon="wealth"
                 title="Stocks & ETFs"
-                text="Listed companies and funds."
+                text="Global companies and diversified funds."
               />
               <Tile
                 slug="real-estate"
                 icon="home"
                 title="Real Estate"
-                text="Property opportunities, explained clearly."
+                text="Property opportunities with the numbers explained."
               />
               <Tile
                 slug="portfolio"
                 icon="chart"
                 title="Portfolio Tracking"
-                text="Everything you hold, in one view."
+                text="Everything you own, in one clear view."
               />
             </div>
           </div>
@@ -304,8 +351,9 @@ export default function HomePage() {
               <div>
                 <h2 className="h2">Shop online with a virtual card</h2>
                 <p className="mut" style={{ fontSize: 19 }}>
-                  Create a virtual card for online purchases. Freeze it in one
-                  tap, set a spending limit and see every transaction.
+                  Get a USD virtual card for subscriptions and online shopping
+                  in seconds. Freeze it in one tap, set your own limits and see
+                  every transaction.
                 </p>
                 <Link className="btn btn-p btn-lg" href="/virtual-cards">
                   Explore Virtual Cards
@@ -339,19 +387,19 @@ export default function HomePage() {
                 slug="learn"
                 icon="book"
                 title="Learn"
-                text="Step-by-step guides and a glossary."
+                text="Step-by-step guides and a plain-English glossary."
               />
               <Tile
                 slug="security"
                 icon="shield"
                 title="Security"
-                text="Keep your account safe."
+                text="How we protect your account, and how you can too."
               />
               <Tile
                 slug="blog"
                 icon="book"
                 title="Blog"
-                text="Updates and market education."
+                text="Product news and market insight."
               />
             </div>
           </div>
@@ -387,8 +435,8 @@ export default function HomePage() {
             <div className="sh">
               <h2>Be first to know when we launch</h2>
               <p>
-                Join the launch list for product news. You can also create an
-                account now to explore the investor preview.
+                Join the launch list for product news and early access. You can
+                also create your account today and start exploring.
               </p>
             </div>
             <WaitlistForm />

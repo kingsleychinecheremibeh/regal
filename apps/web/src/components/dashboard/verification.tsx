@@ -62,7 +62,7 @@ function FilePick({
       hint={
         value
           ? `Selected: ${value.name} (${Math.ceil(value.size / 1024)} KB). Only the name, type and size are recorded.`
-          : "Demo only. Do not upload real documents. The file never leaves your browser."
+          : "Use the sample file for now; secure document upload opens at launch. Files never leave your browser."
       }
     >
       <div className="row">

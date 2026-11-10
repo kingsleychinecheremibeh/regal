@@ -24,7 +24,7 @@ const TABS = [
   "Security",
   "Notifications",
   "Limits",
-  "Demo data",
+  "Reset data",
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -249,7 +249,7 @@ function Security() {
             />
           </div>
           <p className="xs mut mt m0">
-            Simulated in the preview: sign-in does not ask for a code.
+            Codes will be required at sign-in once two-step login goes live.
           </p>
         </div>
       </div>
@@ -319,11 +319,7 @@ function Security() {
               </p>
             </>
           )}
-          <Field
-            label="6-digit code"
-            id="m0"
-            hint="Investor preview: any 6 digits work."
-          >
+          <Field label="6-digit code" id="m0" hint="Enter a 6-digit code.">
             <input
               id="m0"
               inputMode="numeric"
@@ -420,9 +416,9 @@ function DemoData() {
   );
   return (
     <div className="card pad" style={{ maxWidth: 620 }}>
-      <h3>Reset demo data</h3>
+      <h3>Reset account data</h3>
       <p className="sm mut">
-        Use this between investor sessions. Your sign-in and profile are never
+        Start fresh whenever you like. Your sign-in and profile are never
         affected.
       </p>
       <div className="row">
@@ -455,7 +451,7 @@ function DemoData() {
                     api("demo/reset", {
                       body: { verification: confirm === "everything" },
                     }),
-                  { success: "Demo data reset." },
+                  { success: "Account data reset." },
                 );
                 setConfirm(null);
               }}
@@ -465,8 +461,8 @@ function DemoData() {
           }
         >
           <p>
-            This removes your simulated transactions, cards, beneficiaries,
-            orders and notifications.
+            This removes your transactions, cards, beneficiaries, orders and
+            notifications.
             {confirm === "everything" &&
               " Verification goes back to Not Started."}
           </p>
@@ -498,7 +494,7 @@ export function Settings() {
       {tab === "Security" && <Security />}
       {tab === "Notifications" && <Notifications />}
       {tab === "Limits" && <Limits />}
-      {tab === "Demo data" && <DemoData />}
+      {tab === "Reset data" && <DemoData />}
     </>
   );
 }

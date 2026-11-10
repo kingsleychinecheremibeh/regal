@@ -66,7 +66,7 @@ export function FundsModal({
         }),
       {
         success: deposit
-          ? "Deposit started. It is credited when the simulated provider confirms it."
+          ? "Deposit started. We will credit it as soon as the provider confirms."
           : "Withdrawal submitted. Status: Pending.",
         onError: setError,
       },
@@ -124,8 +124,8 @@ export function FundsModal({
       </p>
       <p className="xs mut">
         {deposit
-          ? "Simulated: no money is collected. Funds are credited after about 10 seconds."
-          : "Checked against your balance and the 5,000 USD limit. No money leaves the platform."}
+          ? "Credited in about 10 seconds. No payment is taken before launch."
+          : "Checked against your balance and the 5,000 USD limit. No funds leave TurboXGlobal before launch."}
       </p>
     </Modal>
   );

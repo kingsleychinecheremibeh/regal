@@ -26,7 +26,7 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new ApiErrorFilter());
 
   const openApiConfig = new DocumentBuilder()
-    .setTitle("TurboXGlobal Investor Preview API")
+    .setTitle("TurboXGlobal API")
     .setDescription(
       "Real account identity and isolated financial simulations. No real money movement or investment service.",
     )

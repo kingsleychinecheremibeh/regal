@@ -193,7 +193,7 @@ export function TradeHub() {
     <>
       <PageHead
         title="TradeHUB"
-        sub="Buy, sell and swap supported digital assets at illustrative prices."
+        sub="Buy, sell and swap supported digital assets at indicative prices."
       />
       <Gate />
       <div className="ticket">
@@ -530,9 +530,6 @@ export function TradeHub() {
               )}
             </>
           )}
-          <p className="xs mut mt">
-            Simulated order. No asset is bought or sold.
-          </p>
         </Modal>
       )}
     </>

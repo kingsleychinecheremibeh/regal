@@ -34,7 +34,7 @@ export function Spark({
       height={height}
       preserveAspectRatio="none"
       role="img"
-      aria-label={`Illustrative price chart, ${up ? "up" : "down"} over the period`}
+      aria-label={`Price chart, ${up ? "up" : "down"} over the period`}
     >
       <path
         d={`${path}L${width} ${height}L0 ${height}Z`}

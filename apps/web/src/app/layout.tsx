@@ -16,7 +16,7 @@ const body = Figtree({
 export const metadata: Metadata = {
   title: "TurboXGlobal: Everything You Need to Build Wealth",
   description:
-    "Investor preview of TurboXGlobal: trade digital assets, send money across borders, hold USD, EUR and GBP, spend with virtual cards and explore investments. Accounts are real; all money is simulated.",
+    "TurboXGlobal is one account to trade digital assets, send money across borders, hold USD, EUR and GBP, spend with virtual cards and grow your wealth.",
 };
 
 export default function RootLayout({

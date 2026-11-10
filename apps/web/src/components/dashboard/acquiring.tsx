@@ -123,9 +123,8 @@ export function Acquiring() {
       ) : (
         <>
           <div className="notice info">
-            Sandbox view. Volume, payments, settlements and webhooks are sample
-            data. Payment links and API keys you create are stored but cannot
-            take real payments.
+            You are in test mode. Payment links and API keys work end to end in
+            test mode; live payments switch on once your business is approved.
           </div>
           <div className="grid g4 mb">
             <Kpi
@@ -331,7 +330,9 @@ export function Acquiring() {
             This is the only time the full key is shown.
           </div>
           <code style={{ wordBreak: "break-all" }}>{secret}</code>
-          <p className="xs mut mt">Demo keys cannot call any live service.</p>
+          <p className="xs mut mt">
+            Test key. Live keys are issued after business approval.
+          </p>
         </Modal>
       )}
     </>

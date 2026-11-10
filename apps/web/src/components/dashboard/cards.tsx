@@ -144,7 +144,7 @@ function CardPanel({ card }: { card: Card }) {
               )
             }
           >
-            Simulate a purchase
+            Make a test purchase
           </button>
           <button
             className="btn btn-s btn-sm"
@@ -202,11 +202,7 @@ function CardPanel({ card }: { card: Card }) {
           }
         >
           <p>Enter your 6-digit authenticator code to reveal card details.</p>
-          <Field
-            label="Code"
-            id="rv"
-            hint="Investor preview: any 6 digits work."
-          >
+          <Field label="Code" id="rv" hint="Enter a 6-digit code.">
             <input
               id="rv"
               inputMode="numeric"

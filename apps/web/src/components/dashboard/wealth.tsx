@@ -162,7 +162,7 @@ export function Wealth() {
               <Kpi
                 title="Portfolio value"
                 value={mask(money(totalUsd))}
-                sub="At illustrative prices"
+                sub="At indicative prices"
               />
               <div className="mt">
                 {holdings.length ? (
@@ -224,8 +224,7 @@ export function Wealth() {
               empty="No holdings yet."
             />
             <p className="xs mut mt m0">
-              Real holdings in your demo account are shown here. Watchlist items
-              are not holdings.
+              Your holdings appear here. Watchlist items are not holdings.
             </p>
           </div>
         </>
@@ -278,10 +277,6 @@ export function Wealth() {
             does not guarantee future results. Digital asset prices can be very
             volatile. Information on this screen is educational and not advice.
             Products shown as Not available cannot be bought in your country.
-          </p>
-          <p>
-            In this investor preview, products, prices and holdings are
-            simulated. No security or fund unit is bought.
           </p>
         </div>
       )}

@@ -477,7 +477,7 @@ export function Referrals() {
 const FAQS: [string, string][] = [
   [
     "How do I verify my identity?",
-    "Open Settings, then Verification, and complete the steps. In the preview, use sample data and the demo reviewer to approve.",
+    "Open Settings, then Verification, and complete the steps. Our team reviews every submission and you get a notification with the result.",
   ],
   [
     "Why is my payment pending?",
@@ -492,8 +492,8 @@ const FAQS: [string, string][] = [
     "See Settings, then Limits. They depend on your verification level.",
   ],
   [
-    "How do I reset the demo?",
-    "Open Settings, then Demo data. You can reset balances only, or start over as a new user.",
+    "How do I reset my account data?",
+    "Open Settings, then Reset data. You can reset balances only, or start over as a new user.",
   ],
 ];
 
