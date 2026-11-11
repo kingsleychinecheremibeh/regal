@@ -60,10 +60,9 @@ export function SiteFooter() {
           ))}
         </div>
         <p style={{ marginTop: 34, fontSize: 14 }}>
-          © {new Date().getFullYear()} TurboXGlobal. TurboXGlobal is a financial
-          technology company, not a bank. Instant swap, crypto-card and other
-          relevant services will be powered by licensed partners at launch.
-          Balances shown before launch are not real funds.
+          TurboXGlobal is a financial technology company, not a bank. Instant
+          swap, crypto-card and other relevant services are powered by licensed
+          partners.
         </p>
       </div>
     </footer>
