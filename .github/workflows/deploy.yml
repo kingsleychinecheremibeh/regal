@@ -1,0 +1,71 @@
+name: Deploy
+
+# Press "Run workflow" in the Actions tab to put the chosen branch live.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+env:
+  SITE_URL: https://turboxglobal.com
+  API_URL: http://api.turboxglobal.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+      - name: Build and package the API
+        run: |
+          pnpm --filter @regalvest/api build
+          pnpm --filter @regalvest/api package:cpanel
+      - name: Build and package the website
+        env:
+          API_PROXY_TARGET: ${{ env.API_URL }}
+        run: |
+          pnpm --filter @regalvest/web build
+          pnpm --filter @regalvest/web package:cpanel
+
+      - name: SSH access to cPanel
+        env:
+          KEY: ${{ secrets.CPANEL_SSH_KEY }}
+          HOST: ${{ secrets.CPANEL_HOST }}
+          PORT: ${{ secrets.CPANEL_PORT }}
+          USER: ${{ secrets.CPANEL_USER }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          ssh-keyscan -p "$PORT" "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          printf 'Host cpanel\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/deploy\n  IdentitiesOnly yes\n' \
+            "$HOST" "$PORT" "$USER" > ~/.ssh/config
+
+      - name: Upload, test-start and swap in
+        run: |
+          STAGE="deploy-gh-${{ github.run_id }}"
+          ssh cpanel "rm -rf ~/$STAGE && mkdir -p ~/$STAGE"
+          scp apps/api/dist-cpanel/turboxglobal-api.zip apps/web/dist/cpanel/turboxglobal-web.zip "cpanel:$STAGE/"
+          ssh cpanel "bash -s -- \$HOME/$STAGE" < scripts/cpanel/deploy-remote.sh
+
+      - name: Check the live site (rolls back automatically if it fails)
+        run: |
+          for i in $(seq 1 18); do
+            sleep 5
+            api=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$API_URL/api/v1/health" || true)
+            web=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$SITE_URL/sign-in" || true)
+            echo "api=$api web=$web"
+            if [ "$api" = 200 ] && [ "$web" = 200 ]; then echo "Live and healthy."; exit 0; fi
+          done
+          echo "Live site unhealthy after deploy. Rolling back."
+          ssh cpanel "bash -s" < scripts/cpanel/rollback-remote.sh
+          exit 1

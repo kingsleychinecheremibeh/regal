@@ -1,0 +1,38 @@
+name: Rollback
+
+# Press "Run workflow" to restore the version that was live before the last deploy.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: SSH access to cPanel
+        env:
+          KEY: ${{ secrets.CPANEL_SSH_KEY }}
+          HOST: ${{ secrets.CPANEL_HOST }}
+          PORT: ${{ secrets.CPANEL_PORT }}
+          USER: ${{ secrets.CPANEL_USER }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          ssh-keyscan -p "$PORT" "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          printf 'Host cpanel\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/deploy\n  IdentitiesOnly yes\n' \
+            "$HOST" "$PORT" "$USER" > ~/.ssh/config
+      - run: ssh cpanel "bash -s" < scripts/cpanel/rollback-remote.sh
+      - name: Check the live site
+        run: |
+          for i in $(seq 1 18); do
+            sleep 5
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://turboxglobal.com/sign-in || true)
+            echo "web=$code"
+            [ "$code" = 200 ] && exit 0
+          done
+          exit 1
