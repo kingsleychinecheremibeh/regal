@@ -8,7 +8,6 @@ const columns: [string, [string, string][]][] = [
       ["about", "About"],
       ["blog", "Blog"],
       ["careers", "Careers"],
-      ["faq", "FAQ"],
     ],
   ],
   [
@@ -21,13 +20,6 @@ const columns: [string, [string, string][]][] = [
     ],
   ],
   [
-    "Legal",
-    [
-      ["terms", "Terms of Use"],
-      ["privacy", "Privacy Notice"],
-    ],
-  ],
-  [
     "Support",
     [
       ["help", "Help Center"],
@@ -35,35 +27,52 @@ const columns: [string, [string, string][]][] = [
       ["faq", "FAQ"],
     ],
   ],
+  [
+    "Legal",
+    [
+      ["terms", "Terms of Use"],
+      ["privacy", "Privacy Notice"],
+    ],
+  ],
 ];
+
+const DISCLAIMER =
+  "TurboXGlobal is a financial technology company, not a bank. Instant swaps, crypto card services, and other financial products and services are provided through our network of licensed and regulated third-party partners.";
 
 export function SiteFooter() {
   return (
     <footer className="f">
       <div className="wrap">
         <div className="fg">
-          <div>
+          <div className="f-brand">
             <Logo />
-            <p style={{ marginTop: 14 }}>
-              Trade. Pay. Hold. Invest. One platform for global money.
-            </p>
+            <p>Trade. Pay. Hold. Invest. One platform for global money.</p>
+            <Link className="btn btn-p btn-sm f-cta" href="/sign-up">
+              Get started
+            </Link>
           </div>
           {columns.map(([title, links]) => (
-            <div key={title}>
+            <nav key={title} aria-label={title}>
               <h4>{title}</h4>
               {links.map(([slug, label]) => (
                 <Link key={slug + label} href={`/${slug}`}>
                   {label}
                 </Link>
               ))}
-            </div>
+            </nav>
           ))}
         </div>
-        <p style={{ marginTop: 34, fontSize: 14 }}>
-          TurboXGlobal is a financial technology company, not a bank. Instant
-          swap, crypto-card and other relevant services are powered by licensed
-          partners.
-        </p>
+        <div className="f-bottom">
+          <span>
+            © {new Date().getFullYear()} TurboXGlobal. All rights reserved.
+          </span>
+          <div className="f-legal">
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/contact">Contact</Link>
+          </div>
+        </div>
+        <p className="f-note">{DISCLAIMER}</p>
       </div>
     </footer>
   );
