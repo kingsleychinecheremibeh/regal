@@ -23,9 +23,20 @@ jobs:
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
-          ssh-keyscan -p "$PORT" "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          printf 'Host cpanel\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/deploy\n  IdentitiesOnly yes\n' \
+          # The server's fingerprint is pinned here so a deploy never trusts
+          # a look-alike server. Update it only if the host's key changes.
+          echo '[turboxglobal.com]:21098 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGQ2VVpEIvEsFyvjx2pSd+HxFKEGicbQxo4JUCbgdMvc' > ~/.ssh/known_hosts
+          printf 'Host cpanel\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/deploy\n  IdentitiesOnly yes\n  ConnectTimeout 20\n  ServerAliveInterval 15\n' \
             "$HOST" "$PORT" "$USER" > ~/.ssh/config
+          # Shared hosting sometimes drops the first connection from a new
+          # address, so try a few times before giving up.
+          for attempt in 1 2 3 4 5; do
+            if ssh cpanel true; then echo "Connected to cPanel."; exit 0; fi
+            echo "Connection attempt $attempt failed; retrying in 15s."
+            sleep 15
+          done
+          echo "::error::Could not reach the cPanel server over SSH. The host may be blocking GitHub's servers; check cPanel > SSH Access or ask the host to allow SSH from GitHub Actions."
+          exit 1
       - run: ssh cpanel "bash -s" < scripts/cpanel/rollback-remote.sh
       - name: Check the live site
         run: |
