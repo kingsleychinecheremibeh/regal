@@ -433,10 +433,10 @@ export default function HomePage() {
         <section className="s" id="waitlist">
           <div className="wrap">
             <div className="sh">
-              <h2>Be first to know when we launch</h2>
+              <h2>Be the first to know about our new products</h2>
               <p>
-                Join the launch list for product news and early access. You can
-                also create your account today and start exploring.
+                Join the list for product news and early access. You can also
+                create your account today and start exploring.
               </p>
             </div>
             <WaitlistForm />

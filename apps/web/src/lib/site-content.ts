@@ -593,10 +593,6 @@ export const faq: [string, string][] = [
     "A platform for trading digital assets, sending money, holding USD, EUR and GBP, using virtual cards and exploring investments, all from one account.",
   ],
   [
-    "Is this live? Can I move real money?",
-    "Not yet. Your account and sign-in are real and you can explore every product today, but balances shown before launch are not real funds. Money services go live with our licensed partners at launch.",
-  ],
-  [
     "How do I create an account?",
     "Select Get Started, enter your details and confirm your email. Then verify your profile to unlock all products.",
   ],
