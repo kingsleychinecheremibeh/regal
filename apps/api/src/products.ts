@@ -8,7 +8,7 @@ export const products = [
   },
   {
     id: "turboxpay",
-    name: "TurboXPay",
+    name: "RegvalPay",
     status: "planned",
     description: "Send money and pay bills with costs shown first.",
     capabilities: [

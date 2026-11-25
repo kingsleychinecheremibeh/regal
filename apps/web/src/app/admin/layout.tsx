@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/shell";
 import type { AdminRole } from "@/components/admin/shared";
 
-export const metadata = { title: "Admin · TurboXGlobal" };
+export const metadata = { title: "Admin · Regvalvest" };
 
 /** Every admin page is checked on the server before anything renders. */
 export default async function AdminLayout({

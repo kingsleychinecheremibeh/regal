@@ -19,7 +19,7 @@ const modes = {
   },
   "sign-in": {
     title: "Sign in",
-    note: "Welcome back to TurboXGlobal.",
+    note: "Welcome back to Regvalvest.",
   },
   "forgot-password": {
     title: "Reset your password",
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     slug in modes
       ? modes[slug as keyof typeof modes].title
       : pages[slug]?.title;
-  return title ? { title: `${title} · TurboXGlobal` } : {};
+  return title ? { title: `${title} · Regvalvest` } : {};
 }
 
 export default async function InformationPage({ params }: Params) {

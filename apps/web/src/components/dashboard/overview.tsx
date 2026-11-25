@@ -101,7 +101,7 @@ export function Overview() {
 
   const products: [string, string, boolean?][] = [
     ["TradeHUB", "tradehub"],
-    ["TurboXPay", "turboxpay"],
+    ["RegvalPay", "turboxpay"],
     ["Global Accounts", "accounts"],
     ["Virtual Cards", "cards"],
     ["Wealth", "wealth"],

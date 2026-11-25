@@ -37,7 +37,7 @@ const columns: [string, [string, string][]][] = [
 ];
 
 const DISCLAIMER =
-  "TurboXGlobal is a financial technology company, not a bank. Instant swaps, crypto card services, and other financial products and services are provided through our network of licensed and regulated third-party partners.";
+  "Regvalvest is a financial technology company, not a bank. Instant swaps, crypto card services, and other financial products and services are provided through our network of licensed and regulated third-party partners.";
 
 export function SiteFooter() {
   return (
@@ -64,7 +64,7 @@ export function SiteFooter() {
         </div>
         <div className="f-bottom">
           <span>
-            © {new Date().getFullYear()} TurboXGlobal. All rights reserved.
+            © {new Date().getFullYear()} Regvalvest. All rights reserved.
           </span>
           <div className="f-legal">
             <Link href="/terms">Terms</Link>

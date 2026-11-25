@@ -125,7 +125,7 @@ export function FundsModal({
       <p className="xs mut">
         {deposit
           ? "Credited in about 10 seconds. No payment is taken before launch."
-          : "Checked against your balance and the 5,000 USD limit. No funds leave TurboXGlobal before launch."}
+          : "Checked against your balance and the 5,000 USD limit. No funds leave Regvalvest before launch."}
       </p>
     </Modal>
   );

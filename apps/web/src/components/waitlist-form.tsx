@@ -87,7 +87,7 @@ export function WaitlistForm() {
           disabled={status === "loading"}
         />
         <span className="mut">
-          I agree to receive TurboXGlobal launch updates by email. See the{" "}
+          I agree to receive Regvalvest launch updates by email. See the{" "}
           <Link href="/privacy">privacy policy</Link>.
         </span>
       </label>

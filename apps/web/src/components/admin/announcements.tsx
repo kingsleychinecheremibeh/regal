@@ -68,7 +68,7 @@ export function AdminAnnouncements() {
               maxLength={600}
               value={form.body}
               onChange={(e) => setForm({ ...form, body: e.target.value })}
-              placeholder="TurboXGlobal will be unavailable from 10pm to 10:30pm WAT."
+              placeholder="Regvalvest will be unavailable from 10pm to 10:30pm WAT."
             />
           </label>
           {(form.title || form.body) && (

@@ -247,7 +247,7 @@ export default function HomePage() {
         <section className="s alt">
           <div className="wrap">
             <div className="sh">
-              <h2>Move money without borders with TurboXPay</h2>
+              <h2>Move money without borders with RegvalPay</h2>
               <p>
                 Send, pay and convert from one balance. The fee and exchange
                 rate are always upfront, and every payment comes with a receipt.
@@ -257,7 +257,7 @@ export default function HomePage() {
               <Tile
                 slug="turboxpay"
                 icon="pay"
-                title="TurboXPay"
+                title="RegvalPay"
                 text="Pay family, friends and suppliers from one balance."
               />
               <Tile

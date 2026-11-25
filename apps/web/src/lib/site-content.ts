@@ -27,7 +27,7 @@ export const pages: Record<string, SitePage> = {
   "buy-sell": {
     title: "Buy and sell digital assets",
     icon: "trade",
-    lead: "Buy and sell supported digital assets from your TurboXGlobal account. You see the price, the fee and the total before you confirm.",
+    lead: "Buy and sell supported digital assets from your Regvalvest account. You see the price, the fee and the total before you confirm.",
     features: [
       [
         "Clear pricing",
@@ -92,9 +92,9 @@ export const pages: Record<string, SitePage> = {
     cta: true,
   },
   turboxpay: {
-    title: "TurboXPay",
+    title: "RegvalPay",
     icon: "pay",
-    lead: "TurboXPay is how you move money on TurboXGlobal: send to saved beneficiaries, pay bills, and keep a receipt for every payment.",
+    lead: "RegvalPay is how you move money on Regvalvest: send to saved beneficiaries, pay bills, and keep a receipt for every payment.",
     features: [
       [
         "Saved beneficiaries",
@@ -123,7 +123,7 @@ export const pages: Record<string, SitePage> = {
   bills: {
     title: "Bills and utilities",
     icon: "pay",
-    lead: "Pay your bills from your TurboXGlobal balance without leaving the app. Every payment comes with a receipt.",
+    lead: "Pay your bills from your Regvalvest balance without leaving the app. Every payment comes with a receipt.",
     features: [
       ["Pay from your balance", "Use the currency you already hold."],
       ["Receipts", "Download or share proof of payment whenever you need it."],
@@ -246,7 +246,7 @@ export const pages: Record<string, SitePage> = {
   "stocks-etfs": {
     title: "Stocks and ETFs",
     icon: "wealth",
-    lead: "Invest in listed companies and exchange-traded funds from your TurboXGlobal account. Each product shows its disclosures before you invest.",
+    lead: "Invest in listed companies and exchange-traded funds from your Regvalvest account. Each product shows its disclosures before you invest.",
     features: [
       [
         "Read before you invest",
@@ -301,9 +301,9 @@ export const pages: Record<string, SitePage> = {
     cta: true,
   },
   about: {
-    title: "About TurboXGlobal",
+    title: "About Regvalvest",
     icon: "globe",
-    lead: "TurboXGlobal brings digital assets, payments, multi-currency accounts, cards and investments together in one platform.",
+    lead: "Regvalvest brings digital assets, payments, multi-currency accounts, cards and investments together in one platform.",
     features: [
       [
         "What we do",
@@ -327,7 +327,7 @@ export const pages: Record<string, SitePage> = {
   blog: {
     title: "Blog",
     icon: "book",
-    lead: "Guides, product updates and market education from the TurboXGlobal team.",
+    lead: "Guides, product updates and market education from the Regvalvest team.",
     features: [
       [
         "Getting started",
@@ -387,7 +387,7 @@ export const pages: Record<string, SitePage> = {
     form: "Send a message",
   },
   business: {
-    title: "TurboXGlobal for business",
+    title: "Regvalvest for business",
     icon: "store",
     lead: "Accept payments, hold business funds in several currencies and connect your systems through our API.",
     features: [
@@ -415,7 +415,7 @@ export const pages: Record<string, SitePage> = {
   developers: {
     title: "Developers",
     icon: "code",
-    lead: "Build on TurboXGlobal. Create payments, check their status and receive events in your own systems.",
+    lead: "Build on Regvalvest. Create payments, check their status and receive events in your own systems.",
     features: [
       ["REST and JSON", "Standard HTTP requests and JSON responses."],
       [
@@ -438,14 +438,14 @@ export const pages: Record<string, SitePage> = {
   learn: {
     title: "Learn",
     icon: "book",
-    lead: "Plain-language guides to help you use TurboXGlobal with confidence.",
+    lead: "Plain-language guides to help you use Regvalvest with confidence.",
     features: [],
     steps: [],
   },
   security: {
     title: "Security",
     icon: "shield",
-    lead: "How to keep your TurboXGlobal account safe, and what you can do if something looks wrong.",
+    lead: "How to keep your Regvalvest account safe, and what you can do if something looks wrong.",
     features: [
       [
         "Multi-factor authentication",
@@ -467,24 +467,24 @@ export const pages: Record<string, SitePage> = {
   faq: {
     title: "Frequently asked questions",
     icon: "book",
-    lead: "Quick answers about TurboXGlobal.",
+    lead: "Quick answers about Regvalvest.",
     features: [],
     steps: [],
   },
   terms: {
     title: "Terms of use",
     icon: "book",
-    lead: "Last updated 1 November 2026. These terms apply when you use TurboXGlobal.",
+    lead: "Last updated 1 November 2026. These terms apply when you use Regvalvest.",
     features: [],
     steps: [],
     legal: [
       [
         "1. About these terms",
-        "These terms are an agreement between you and TurboXGlobal. By creating an account or using the site you accept them. If you do not agree, do not use the service.",
+        "These terms are an agreement between you and Regvalvest. By creating an account or using the site you accept them. If you do not agree, do not use the service.",
       ],
       [
         "2. Pre-launch status",
-        "TurboXGlobal is in pre-launch. Accounts and sign-in are real, but balances, prices, trades, payments, cards, accounts, investments and rewards are simulated, have no monetary value and cannot be withdrawn, redeemed or transferred. We do not currently hold customer funds or offer regulated payment, banking, brokerage or custody services.",
+        "Regvalvest is in pre-launch. Accounts and sign-in are real, but balances, prices, trades, payments, cards, accounts, investments and rewards are simulated, have no monetary value and cannot be withdrawn, redeemed or transferred. We do not currently hold customer funds or offer regulated payment, banking, brokerage or custody services.",
       ],
       [
         "3. Eligibility",
@@ -504,11 +504,11 @@ export const pages: Record<string, SitePage> = {
       ],
       [
         "7. No advice",
-        "Nothing on TurboXGlobal is investment, financial, legal or tax advice. Prices shown are illustrative and are not market quotes.",
+        "Nothing on Regvalvest is investment, financial, legal or tax advice. Prices shown are illustrative and are not market quotes.",
       ],
       [
         "8. Intellectual property",
-        "The site, its design, software and content belong to TurboXGlobal or its licensors. You may use them only to access the service for yourself.",
+        "The site, its design, software and content belong to Regvalvest or its licensors. You may use them only to access the service for yourself.",
       ],
       [
         "9. Availability and changes",
@@ -516,7 +516,7 @@ export const pages: Record<string, SitePage> = {
       ],
       [
         "10. Liability",
-        "To the extent the law allows, TurboXGlobal is not liable for indirect or consequential loss, or for any decision you make based on simulated information. Nothing in these terms limits liability that cannot be limited by law.",
+        "To the extent the law allows, Regvalvest is not liable for indirect or consequential loss, or for any decision you make based on simulated information. Nothing in these terms limits liability that cannot be limited by law.",
       ],
       [
         "11. Suspension and closure",
@@ -531,13 +531,13 @@ export const pages: Record<string, SitePage> = {
   privacy: {
     title: "Privacy policy",
     icon: "shield",
-    lead: "Last updated 1 November 2026. How TurboXGlobal collects, uses and protects your personal data.",
+    lead: "Last updated 1 November 2026. How Regvalvest collects, uses and protects your personal data.",
     features: [],
     steps: [],
     legal: [
       [
         "1. Who we are",
-        "TurboXGlobal operates this website and is responsible for the personal data described here. You can reach us through our Contact page.",
+        "Regvalvest operates this website and is responsible for the personal data described here. You can reach us through our Contact page.",
       ],
       [
         "2. Data we collect",
@@ -577,7 +577,7 @@ export const pages: Record<string, SitePage> = {
       ],
       [
         "11. Children",
-        "TurboXGlobal is not for anyone under 18, and we do not knowingly collect their data.",
+        "Regvalvest is not for anyone under 18, and we do not knowingly collect their data.",
       ],
       [
         "12. Changes",
@@ -589,7 +589,7 @@ export const pages: Record<string, SitePage> = {
 
 export const faq: [string, string][] = [
   [
-    "What is TurboXGlobal?",
+    "What is Regvalvest?",
     "A platform for trading digital assets, sending money, holding USD, EUR and GBP, using virtual cards and exploring investments, all from one account.",
   ],
   [
@@ -649,7 +649,7 @@ export const nav: [string, [string, [string, string][]][]][] = [
       [
         "Pay",
         [
-          ["turboxpay", "TurboXPay"],
+          ["turboxpay", "RegvalPay"],
           ["bills", "Bills & Utilities"],
           ["transfers", "International Transfers"],
           ["convert", "Currency Conversion"],

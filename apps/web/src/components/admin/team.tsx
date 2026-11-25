@@ -53,8 +53,8 @@ export function AdminTeam() {
           <section className="card pad">
             <h3 className="adm-h3">Add a team member</h3>
             <p className="xs mut">
-              They need a TurboXGlobal account first. Their access starts the
-              next time they sign in.
+              They need a Regvalvest account first. Their access starts the next
+              time they sign in.
             </p>
             <label className="adm-field">
               Email

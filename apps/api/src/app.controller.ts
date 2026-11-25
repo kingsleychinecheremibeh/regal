@@ -50,7 +50,7 @@ const waitlistInput = z.strictObject({
   consent: z.literal(true),
 });
 
-@ApiTags("TurboXGlobal public")
+@ApiTags("Regvalvest public")
 @ApiExtraModels(ProductDto)
 @Controller("api/v1")
 export class AppController {
@@ -65,7 +65,7 @@ export class AppController {
     type: HealthDto,
     example: {
       status: "ok",
-      service: "turboxglobal-api",
+      service: "regvalvest-api",
       timestamp: "2026-10-13T12:00:00.000Z",
     },
   })
@@ -81,7 +81,7 @@ export class AppController {
     }
     return {
       status: "ok",
-      service: "turboxglobal-api",
+      service: "regvalvest-api",
       timestamp: new Date().toISOString(),
     };
   }

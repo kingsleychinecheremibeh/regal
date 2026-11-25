@@ -658,7 +658,7 @@ function TicketThread({
             className={`adm-msgbox ${m.fromStaff ? "staff" : "customer"}`}
           >
             <div className="xs mut">
-              {m.fromStaff ? "TurboXGlobal support" : "You"} ·{" "}
+              {m.fromStaff ? "Regvalvest support" : "You"} ·{" "}
               {dateTime(m.createdAt)}
             </div>
             <p>{m.body}</p>

@@ -83,7 +83,7 @@ integration("Regalvest API with isolated PostgreSQL", () => {
     expect(health.status).toBe(200);
     expect(await health.json()).toMatchObject({
       status: "ok",
-      service: "turboxglobal-api",
+      service: "regvalvest-api",
     });
     const products = await fetch(`${baseUrl}/api/v1/products`);
     expect(products.status).toBe(200);

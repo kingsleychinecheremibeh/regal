@@ -217,7 +217,7 @@ export function Pay() {
 
   return (
     <>
-      <PageHead title="TurboXPay" sub="Send money and pay bills." />
+      <PageHead title="RegvalPay" sub="Send money and pay bills." />
       <Gate />
       <div className="grid g2">
         <div className="card pad">

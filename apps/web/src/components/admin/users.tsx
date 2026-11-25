@@ -57,7 +57,7 @@ export function AdminUsers() {
     <>
       <Head
         title="Users"
-        sub="Everyone with a TurboXGlobal account. Open a user to see their profile and take action."
+        sub="Everyone with a Regvalvest account. Open a user to see their profile and take action."
       />
       <Toolbar
         placeholder="Search by name or email"

@@ -81,7 +81,7 @@ export class DemoCore {
       .insert(accountProfiles)
       .values({
         userId,
-        referralCode: `TURBO-${userId.replace(/-/g, "").slice(0, 6).toUpperCase()}`,
+        referralCode: `RV-${userId.replace(/-/g, "").slice(0, 6).toUpperCase()}`,
       })
       .onConflictDoNothing();
     await this.db

@@ -17,7 +17,7 @@ import {
 export const modules = [
   { slug: "overview", label: "Overview", icon: House },
   { slug: "tradehub", label: "TradeHUB", icon: TrendingUp },
-  { slug: "turboxpay", label: "TurboXPay", icon: Wallet },
+  { slug: "turboxpay", label: "RegvalPay", icon: Wallet },
   { slug: "acquiring", label: "Fiat Acquiring", icon: Store, business: true },
   { slug: "accounts", label: "Global Accounts", icon: Globe2 },
   { slug: "cards", label: "Virtual Cards", icon: CreditCard },

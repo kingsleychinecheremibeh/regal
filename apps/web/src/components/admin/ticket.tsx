@@ -94,7 +94,7 @@ export function AdminTicket({ id }: { id: string }) {
           >
             <div className="xs mut">
               {m.fromStaff
-                ? `${m.author ?? "Support"} (TurboXGlobal support)`
+                ? `${m.author ?? "Support"} (Regvalvest support)`
                 : ticket.fullName}{" "}
               · {dateTime(m.createdAt)}
             </div>

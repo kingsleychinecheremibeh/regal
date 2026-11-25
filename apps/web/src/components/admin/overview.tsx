@@ -55,7 +55,7 @@ export function AdminOverview() {
     <>
       <Head
         title="Overview"
-        sub="Accounts, verification and sandbox activity across TurboXGlobal."
+        sub="Accounts, verification and sandbox activity across Regvalvest."
       />
 
       {(o.inReview > 0 || openTickets > 0) && (

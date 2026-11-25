@@ -210,7 +210,7 @@ function KycForm({
           <option value="other">Other</option>
         </select>
       </Field>
-      <Field label="What will you use TurboXGlobal for?" id="k-purpose">
+      <Field label="What will you use Regvalvest for?" id="k-purpose">
         <select
           id="k-purpose"
           value={q.purpose}

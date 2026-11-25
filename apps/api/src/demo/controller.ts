@@ -315,7 +315,7 @@ export class DemoController {
     const body = await this.records.csv(req.userId, query);
     res
       .type("text/csv; charset=utf-8")
-      .attachment("turboxglobal-transactions.csv")
+      .attachment("regvalvest-transactions.csv")
       .send(body);
   }
 

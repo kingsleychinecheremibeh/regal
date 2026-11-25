@@ -84,7 +84,7 @@ export function AdminStatus() {
     <>
       <Head
         title="System status"
-        sub="Live health of the TurboXGlobal platform. Refreshes every 30 seconds."
+        sub="Live health of the Regvalvest platform. Refreshes every 30 seconds."
         action={
           <button className="btn btn-s btn-sm" onClick={reload}>
             <RefreshCw size={15} aria-hidden="true" /> Check now
